@@ -1,5 +1,6 @@
 package com.persepolis.IA.controller;
 
+import com.persepolis.IA.ChatService;
 import com.persepolis.IA.dto.Message;
 import com.persepolis.IA.services.AiClient;
 import jakarta.annotation.PostConstruct;
@@ -14,12 +15,14 @@ import reactor.core.publisher.Mono;
 public class TestController {
 
     private final AiClient ai;
+    private final ChatService chatService;
 
     // Usamos una lista mutable para construir el historial de la conversación
     private final List<Message> conversationHistory = new ArrayList<>();
 
-    public TestController(AiClient ai) {
+    public TestController(AiClient ai, ChatService chatService) {
         this.ai = ai;
+        this.chatService = chatService;
     }
 
     @GetMapping("/test/ollama")
@@ -38,8 +41,8 @@ public class TestController {
         // 1. Añadimos el mensaje del usuario al historial
         conversationHistory.add(new Message("user", message));
 
-        // 2. Hacemos la llamada al servicio de chat con el historial completo
-        return ai.chat(conversationHistory, true)
+        // 2. Delegamos la lógica al ChatService (que maneja el flujo de preguntas)
+        return chatService.processMessage(message)
                 .flatMap(aiResponse -> {
                     // 3. Añadimos la respuesta de la IA al historial
                     conversationHistory.add(new Message("assistant", aiResponse));
