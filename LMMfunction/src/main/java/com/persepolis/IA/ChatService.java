@@ -1,10 +1,13 @@
 package com.persepolis.IA;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.persepolis.IA.Scraper.CScrap;
 import com.persepolis.IA.services.AiClient;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,37 +20,21 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final AiClient aiClient;
+    private ChatData chatData;
 
     public ChatService(AiClient aiClient) {
         this.aiClient = aiClient;
+        loadChatData();
     }
 
-    private static final List<String> STANDARD_QUESTIONS = List.of(
-        "1. ¿Nivel de luminosidad? (1: Muy oscuro, 10: Muy brillante)",
-        "2. ¿Saturación de color? (1: Blanco y negro, 10: Colores neón)",
-        "3. ¿Estilo visual? (1: Abstracto/Surrealista, 10: Fotorealista)",
-        "4. ¿Complejidad? (1: Minimalista, 10: Muy detallado)",
-        "5. ¿Época? (1: Retro/Vintage, 10: Futurista/Sci-Fi)",
-        "6. ¿Temperatura? (1: Frío/Azul, 10: Cálido/Naranja)",
-        "7. ¿Energía? (1: Calma/Zen, 10: Acción/Caos)",
-        "8. ¿Entorno? (1: Interior/Tecnológico, 10: Naturaleza/Exterior)",
-        "9. ¿Temática? (1: Cotidiano, 10: Fantasía)",
-        "10. ¿Enfoque? (1: Paisaje amplio, 10: Primer plano/Macro)"
-    );
-
-    // Mapeo de palabras clave para las 10 preguntas (Opción A <= 5, Opción B > 5)
-    private static final List<String[]> KEYWORD_MAPPING = List.of(
-        new String[]{"dark", "bright"},          // 1. Luminosidad
-        new String[]{"monochrome", "colorful"},  // 2. Saturación
-        new String[]{"abstract", "realistic"},   // 3. Estilo
-        new String[]{"minimalist", "detailed"},  // 4. Complejidad
-        new String[]{"vintage", "futuristic"},   // 5. Época
-        new String[]{"cold", "warm"},            // 6. Temperatura
-        new String[]{"calm", "dynamic"},         // 7. Energía
-        new String[]{"tech", "nature"},          // 8. Entorno
-        new String[]{"daily", "fantasy"},        // 9. Temática
-        new String[]{"landscape", "macro"}       // 10. Enfoque
-    );
+    private void loadChatData() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            this.chatData = mapper.readValue(new ClassPathResource("chat_data.json").getInputStream(), ChatData.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Error cargando chat_data.json", e);
+        }
+    }
 
     // Almacenamiento temporal de sesiones (en memoria)
     private final Map<String, UserSession> sessions = new HashMap<>();
@@ -64,19 +51,19 @@ public class ChatService {
         }
 
         if (isGreeting(lower)) {
-            return Mono.just("¡Hola! / Hello! / Bonjour! ¿Tienes una idea específica? Si no, escribe 'estándar' para iniciar nuestra búsqueda guiada.");
+            return Mono.just(chatData.getResponse("greeting"));
         }
 
         if (isStandardRequest(lower)) {
             UserSession session = new UserSession();
-            session.questions = STANDARD_QUESTIONS;
+            session.currentNodeId = "root";
             session.isStandard = true;
             sessions.put(userId, session);
-            return Mono.just("¡Perfecto! Iniciemos el proceso estándar (10 preguntas).\n" + STANDARD_QUESTIONS.get(0));
+            return Mono.just(chatData.getResponse("standardStart", chatData.getDecisionTree().getRoot().getText()));
         }
 
         if (isUnsure(lower)) {
-            return Mono.just("No estoy seguro de lo que buscas. Te recomiendo escribir 'estándar' para que te ayudemos con preguntas clave.");
+            return Mono.just(chatData.getResponse("unsure"));
         }
 
         // 2. Caso: Usuario seguro con petición específica -> Iniciar flujo de 5 preguntas IA
@@ -84,16 +71,17 @@ public class ChatService {
     }
 
     private boolean isGreeting(String message) {
-        return message.matches("^(hola|hello|hi|bonjour|salut|ola|hallo|buenos|buenas|saludos|hey|good morning).*");
+        String pattern = "^(" + String.join("|", chatData.getGreetingPatterns()) + ").*";
+        return message.matches(pattern);
     }
 
     private boolean isStandardRequest(String message) {
-        return message.contains("estandar") || message.contains("estándar") || 
-               message.contains("standard") || message.contains("guia") || message.contains("guide");
+        return chatData.getStandardRequestKeywords().stream().anyMatch(message::contains);
     }
 
     private boolean isUnsure(String message) {
-        return message.length() < 4 || message.contains("no se") || message.contains("idk") || message.contains("maybe");
+        if (message.length() < 4) return true;
+        return chatData.getUnsureKeywords().stream().anyMatch(message::contains);
     }
 
     private Mono<String> startSpecificFlow(String userId, String request) {
@@ -102,13 +90,11 @@ public class ChatService {
         
         UserSession session = new UserSession();
         session.originalRequest = keywords.isEmpty() ? request : keywords;
-        session.questions = STANDARD_QUESTIONS;
+        session.currentNodeId = "root";
         session.isStandard = true;
         sessions.put(userId, session);
 
-        return Mono.just("Entendido. Buscaré fondos sobre: '" + session.originalRequest + "'.\n" +
-                         "Para afinar los resultados, responde estas 10 preguntas (1-10):\n" + 
-                         STANDARD_QUESTIONS.get(0));
+        return Mono.just(chatData.getResponse("specificStart", session.originalRequest, chatData.getDecisionTree().getRoot().getText()));
     }
 
     private Mono<String> processActiveSession(String userId, String message) {
@@ -119,73 +105,102 @@ public class ChatService {
             String lower = message.trim().toLowerCase();
             if (lower.startsWith("si") || lower.startsWith("yes") || lower.startsWith("s") || lower.contains("ok")) {
                 sessions.remove(userId);
-                return Mono.just("¡Genial! Me alegro de haber ayudado.");
+                return Mono.just(chatData.getResponse("satisfactionYes"));
             } else {
                 // Usuario NO satisfecho -> Usar LLM para generar nuevas keywords
                 return generateAlternativeKeywordsWithLLM(session).map(newQuery -> {
                     sessions.remove(userId);
-                    return searchAndFormat(newQuery, session.originalRequest) + "\n\nEspero que estos resultados sean mejores.";
+                    return chatData.getResponse("satisfactionRetry", searchAndFormat(newQuery, session.originalRequest));
                 });
             }
         }
 
-        try {
-            int rating = Integer.parseInt(message.trim());
-            if (rating < 1 || rating > 10) throw new NumberFormatException();
-            session.answers.add(rating);
-        } catch (NumberFormatException e) {
-            return Mono.just("Por favor, responde únicamente con un número del 1 al 10.\n" + session.questions.get(session.currentQuestionIndex));
+        // Lógica del Árbol de Decisión
+        ChatData.Node currentNode;
+        if ("root".equals(session.currentNodeId)) {
+            currentNode = chatData.getDecisionTree().getRoot();
+        } else {
+            currentNode = chatData.getDecisionTree().getNodes().get(session.currentNodeId);
         }
 
-        session.currentQuestionIndex++;
+        String nextNodeId = null;
 
-        if (session.currentQuestionIndex < session.questions.size()) {
-            return Mono.just("Siguiente (" + (session.currentQuestionIndex + 1) + "/" + session.questions.size() + "):\n" + session.questions.get(session.currentQuestionIndex));
+        if ("open".equals(currentNode.getType())) {
+            // Pregunta abierta
+            String input = message.trim();
+            if (!input.equalsIgnoreCase("no") && !input.equalsIgnoreCase("ninguno") && !input.equalsIgnoreCase("skip")) {
+                session.collectedKeywords.add(input);
+            }
+            nextNodeId = currentNode.getNext();
+        } else {
+            // Pregunta de opción múltiple (default)
+            try {
+                String inputKey = message.trim();
+                ChatData.Option selectedOption = currentNode.getOptions().get(inputKey);
+                
+                if (selectedOption == null) {
+                    throw new IllegalArgumentException("Opción no válida");
+                }
+                
+                if (selectedOption.getKeyword() != null && !selectedOption.getKeyword().isEmpty()) {
+                    session.collectedKeywords.add(selectedOption.getKeyword());
+                }
+                nextNodeId = selectedOption.getNext();
+                
+            } catch (Exception e) {
+                return Mono.just(chatData.getResponse("numberFormatError", currentNode.getText()));
+            }
+        }
+
+        // Avanzar al siguiente nodo
+        if (nextNodeId != null && !"END".equals(nextNodeId)) {
+            session.currentNodeId = nextNodeId;
+            ChatData.Node nextNode = chatData.getDecisionTree().getNodes().get(nextNodeId);
+            return Mono.just(chatData.getResponse("nextQuestion", nextNode.getText()));
         } else {
             // Flujo terminado
-            String finalResult = generateStandardKeywords(session);
+            String base = (session.originalRequest != null) ? session.originalRequest + " " : "";
+            String finalResult = base + String.join(" ", session.collectedKeywords);
+            
             session.lastGeneratedQuery = finalResult;
             session.waitingForSatisfaction = true;
             
             String results = searchAndFormat(finalResult, session.originalRequest);
-            return Mono.just(results + "\n\n¿Estás satisfecho con los resultados? (Sí/No)");
+            return Mono.just(chatData.getResponse("satisfactionAsk", results));
         }
     }
 
     private Mono<String> generateAlternativeKeywordsWithLLM(UserSession session) {
-        String prompt = "El usuario buscó: '" + session.originalRequest + "'.\n" +
-                        "Se usaron estas palabras clave: '" + session.lastGeneratedQuery + "' pero el usuario NO está satisfecho.\n" +
-                        "Genera una lista de 3 a 5 nuevas combinaciones de palabras clave (queries) para mejorar la búsqueda.\n" +
-                        "Deben ser diferentes a las anteriores. Devuelve SOLO las palabras clave separadas por ' ||| '.\n" +
-                        "Ejemplo: query one ||| query two ||| query three";
+        String prompt = chatData.getResponse("llmPrompt", session.originalRequest, session.lastGeneratedQuery);
         return aiClient.generate(prompt, false);
     }
 
-    private String generateStandardKeywords(UserSession session) {
-        StringBuilder query = new StringBuilder();
-        List<Integer> answers = session.answers;
-        String base = session.originalRequest;
-        // Repetimos las palabras clave base para darles mayor peso en la búsqueda
-        String prefix = (base != null && !base.isEmpty()) ? base + " " + base + " " : "";
-        
-        // Bucle for que itera de 0 a 9 procesando las respuestas estándar
-        for (int i = 0; i < answers.size(); i++) {
-            if (i >= KEYWORD_MAPPING.size()) break;
-            String[] options = KEYWORD_MAPPING.get(i);
-            // Si la respuesta es > 5 usa la segunda opción (índice 1), si no la primera (índice 0)
-            String trait = answers.get(i) > 5 ? options[1] : options[0];
-            query.append(prefix).append(trait).append(" ||| ");
-        }
-        return query.toString();
-    }
-
     private String extractKeywords(String text) {
-        // Reemplazar puntuación con espacios y limpiar
-        String cleaned = text.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s]", " ");
-        String[] stopWords = {"quiero", "un", "una", "el", "la", "los", "las", "fondo", "fondos", "de", "del", "pantalla", "wallpaper", "wallpapers", "imagen", "imagenes", "foto", "fotos", "sobre", "about", "for", "picture", "pictures", "dame", "ver", "show", "me", "y", "and", "with", "con", "busco", "necesito", "tienes", "hola", "hey", "buenos", "dias"};
-        List<String> stops = Arrays.asList(stopWords);
-        return Arrays.stream(cleaned.split("\\s+"))
-                .filter(w -> !w.isEmpty() && !stops.contains(w.toLowerCase()))
+        String processed = text.toLowerCase(Locale.ROOT);
+
+        // 1. Normalización de Slang
+        for (Map.Entry<String, String> entry : chatData.getSlangMapping().entrySet()) {
+            processed = processed.replace(entry.getKey(), entry.getValue());
+        }
+
+        // 2. Limpieza y Tokenización
+        String cleaned = processed.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s]", " ");
+        List<String> tokens = Arrays.asList(cleaned.split("\\s+"));
+
+        // 3. Filtrado: ¿Coincide con keywords que reconocen los sitios?
+        List<String> validKeywords = tokens.stream()
+                .filter(chatData.getSiteKeywords()::contains)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!validKeywords.isEmpty()) {
+            return String.join(" ", validKeywords);
+        }
+
+        // Fallback: Si no hay coincidencias de sitio, usamos limpieza de stopwords estándar
+        List<String> stops = chatData.getStopWords();
+        return tokens.stream()
+                .filter(w -> !w.isEmpty() && !stops.contains(w))
                 .collect(Collectors.joining(" "));
     }
 
@@ -212,19 +227,19 @@ public class ChatService {
             }
             
             if (resultCounts.isEmpty()) {
-                return "No se encontraron fondos para: " + query;
+                return chatData.getResponse("noResults", query);
             }
 
             List<Map.Entry<Map<String, String>, Integer>> sortedResults = new ArrayList<>(resultCounts.entrySet());
             sortedResults.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
-            StringBuilder sb = new StringBuilder("¡Aquí tienes tus fondos para '" + originalRequest + "'!:\n");
+            StringBuilder sb = new StringBuilder(chatData.getResponse("resultsHeader", originalRequest));
             for (Map.Entry<Map<String, String>, Integer> entry : sortedResults) {
                 sb.append(entry.getKey().values()).append("\n");
             }
             return sb.toString();
         } catch (Exception e) {
-            return "Hubo un error buscando los fondos: " + e.getMessage();
+            return chatData.getResponse("error", e.getMessage());
         }
     }
 
@@ -250,9 +265,8 @@ public class ChatService {
 
     private static class UserSession {
         String originalRequest;
-        List<String> questions;
-        List<Integer> answers = new ArrayList<>();
-        int currentQuestionIndex = 0;
+        String currentNodeId;
+        List<String> collectedKeywords = new ArrayList<>();
         boolean isStandard = false;
         boolean waitingForSatisfaction = false;
         String lastGeneratedQuery;

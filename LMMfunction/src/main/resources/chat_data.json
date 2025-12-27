@@ -1,0 +1,165 @@
+{
+  "decisionTree": {
+    "root": {
+      "id": "style",
+      "text": "1. ¿Qué estilo visual prefieres? (Elige 1-5)\n1. Anime / Manga\n2. Realista / Fotografía\n3. Arte Digital / Ilustración\n4. Minimalista / Vector\n5. Sci-Fi / Futurista",
+      "type": "choice",
+      "options": {
+        "1": { "keyword": "anime", "next": "sub_anime" },
+        "2": { "keyword": "realistic photography", "next": "sub_real" },
+        "3": { "keyword": "art illustration", "next": "sub_art" },
+        "4": { "keyword": "minimalist vector", "next": "sub_min" },
+        "5": { "keyword": "scifi futuristic", "next": "sub_scifi" }
+      }
+    },
+    "nodes": {
+      "sub_anime": {
+        "text": "2. ¿Qué subgénero de Anime? (1-5)\n1. Shonen (Acción)\n2. Shojo (Romance/Magia)\n3. Mecha (Robots)\n4. Cyberpunk/Dark\n5. Slice of Life (Cotidiano)",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "shonen action", "next": "sensation" },
+          "2": { "keyword": "shojo romance magic", "next": "sensation" },
+          "3": { "keyword": "mecha robot", "next": "sensation" },
+          "4": { "keyword": "cyberpunk dark", "next": "sensation" },
+          "5": { "keyword": "slice of life", "next": "sensation" }
+        }
+      },
+      "sub_real": {
+        "text": "2. ¿Qué tipo de fotografía? (1-5)\n1. Paisajes Naturales\n2. Urbano/Arquitectura\n3. Automóviles/Vehículos\n4. Animales\n5. Espacio/Cielo",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "nature landscape", "next": "sensation" },
+          "2": { "keyword": "urban city architecture", "next": "sensation" },
+          "3": { "keyword": "cars vehicles", "next": "sensation" },
+          "4": { "keyword": "animals wildlife", "next": "sensation" },
+          "5": { "keyword": "space sky stars", "next": "sensation" }
+        }
+      },
+      "sub_art": {
+        "text": "2. ¿Qué estilo artístico? (1-5)\n1. Pintura al óleo/Clásico\n2. Acuarela/Suave\n3. Fantasía Épica\n4. Surrealismo\n5. Pixel Art",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "oil painting classic", "next": "sensation" },
+          "2": { "keyword": "watercolor soft", "next": "sensation" },
+          "3": { "keyword": "fantasy epic", "next": "sensation" },
+          "4": { "keyword": "surrealism abstract", "next": "sensation" },
+          "5": { "keyword": "pixel art 8bit", "next": "sensation" }
+        }
+      },
+      "sub_min": {
+        "text": "2. ¿Qué tipo de minimalismo? (1-5)\n1. Geométrico\n2. Tipografía/Frases\n3. Naturaleza Simple\n4. Tecnología\n5. Patrones/Texturas",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "geometric shapes", "next": "sensation" },
+          "2": { "keyword": "typography quotes", "next": "sensation" },
+          "3": { "keyword": "simple nature", "next": "sensation" },
+          "4": { "keyword": "technology simple", "next": "sensation" },
+          "5": { "keyword": "pattern texture", "next": "sensation" }
+        }
+      },
+      "sub_scifi": {
+        "text": "2. ¿Qué temática Sci-Fi? (1-5)\n1. Cyberpunk/Neon\n2. Espacio/Naves\n3. Post-apocalíptico\n4. Retro-wave (80s)\n5. Robots/IA",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "cyberpunk neon city", "next": "sensation" },
+          "2": { "keyword": "space spaceship", "next": "sensation" },
+          "3": { "keyword": "post apocalyptic", "next": "sensation" },
+          "4": { "keyword": "retrowave synthwave", "next": "sensation" },
+          "5": { "keyword": "robots ai cyborg", "next": "sensation" }
+        }
+      },
+      "sensation": {
+        "text": "3. ¿Qué sensación buscas? (1-5)\n1. Relajante / Zen\n2. Energético / Acción\n3. Oscuro / Misterioso\n4. Alegre / Colorido\n5. Épico / Grandioso",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "relaxing calm zen", "next": "usage" },
+          "2": { "keyword": "energetic action dynamic", "next": "usage" },
+          "3": { "keyword": "dark mysterious gloomy", "next": "usage" },
+          "4": { "keyword": "happy colorful bright", "next": "usage" },
+          "5": { "keyword": "epic majestic grand", "next": "usage" }
+        }
+      },
+      "usage": {
+        "text": "4. ¿Para qué dispositivo es? (1-3)\n1. Escritorio (PC)\n2. Móvil (Smartphone)\n3. Tablet / General",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "desktop wallpaper wide", "next": "color" },
+          "2": { "keyword": "mobile wallpaper phone vertical", "next": "color" },
+          "3": { "keyword": "wallpaper", "next": "color" }
+        }
+      },
+      "color": {
+        "text": "5. ¿Color dominante? (1-5)\n1. Oscuro / Negro\n2. Claro / Blanco\n3. Colores Vivos / Neón\n4. Pastel / Suave\n5. Cálido (Rojo/Naranja)",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "dark black", "next": "resolution" },
+          "2": { "keyword": "light white", "next": "resolution" },
+          "3": { "keyword": "vivid neon colorful", "next": "resolution" },
+          "4": { "keyword": "pastel soft colors", "next": "resolution" },
+          "5": { "keyword": "warm red orange", "next": "resolution" }
+        }
+      },
+      "resolution": {
+        "text": "6. ¿Resolución preferida? (1-3)\n1. HD (1080p)\n2. 4K (UHD)\n3. 8K / Máxima calidad",
+        "type": "choice",
+        "options": {
+          "1": { "keyword": "1080p hd", "next": "character" },
+          "2": { "keyword": "4k uhd", "next": "character" },
+          "3": { "keyword": "8k high quality", "next": "character" }
+        }
+      },
+      "character": {
+        "text": "7. (Opcional) Escribe el nombre de un personaje, objeto o detalle específico. (Escribe 'no' para omitir)",
+        "type": "open",
+        "next": "END"
+      }
+    }
+  },
+  "slangMapping": {
+    "monas chinas": "anime",
+    "mona china": "anime",
+    "tetonas": "nsfw",
+    "tetona": "nsfw",
+    "waifus": "waifu",
+    "minitas": "girls",
+    "fondos chidos": "best"
+  },
+  "siteKeywords": [
+    "anime", "manga", "waifu", "nsfw", "nature", "landscape", "forest", "mountain", "sea", "ocean",
+    "city", "urban", "architecture", "cars", "vehicles", "space", "galaxy", "stars",
+    "abstract", "minimalist", "texture", "technology", "cyberpunk", "fantasy", "sci-fi",
+    "animals", "cats", "dogs", "wildlife", "games", "gaming", "movies", "tv",
+    "dark", "black", "white", "colorful", "neon", "pastel", "vintage", "retro",
+    "4k", "hd", "wallpaper", "background", "desktop", "mobile", "girls", "women"
+  ],
+  "stopWords": [
+    "quiero", "un", "una", "el", "la", "los", "las", "fondo", "fondos", "de", "del", "pantalla",
+    "wallpaper", "wallpapers", "imagen", "imagenes", "foto", "fotos", "sobre", "about", "for",
+    "picture", "pictures", "dame", "ver", "show", "me", "y", "and", "with", "con", "busco",
+    "necesito", "tienes", "hola", "hey", "buenos", "dias"
+  ],
+  "greetingPatterns": [
+    "hola", "hello", "hi", "bonjour", "salut", "ola", "hallo", "buenos", "buenas", "saludos", "hey", "good morning"
+  ],
+  "standardRequestKeywords": [
+    "estandar", "estándar", "standard", "guia", "guide"
+  ],
+  "unsureKeywords": [
+    "no se", "idk", "maybe"
+  ],
+  "responses": {
+    "greeting": "¡Hola! / Hello! / Bonjour! ¿Tienes una idea específica? Si no, escribe 'estándar' para iniciar nuestra búsqueda guiada.",
+    "standardStart": "¡Perfecto! Iniciemos el proceso de selección.\n%s",
+    "unsure": "No estoy seguro de lo que buscas. Te recomiendo escribir 'estándar' para que te ayudemos con preguntas clave.",
+    "specificStart": "Entendido. Buscaré fondos sobre: '%s'.\nPara afinar los resultados, responde estas preguntas:\n%s",
+    "satisfactionYes": "¡Genial! Me alegro de haber ayudado.",
+    "satisfactionAsk": "%s\n\n¿Estás satisfecho con los resultados? (Sí/No)",
+    "satisfactionRetry": "%s\n\nEspero que estos resultados sean mejores.",
+    "numberFormatError": "Por favor, selecciona una opción válida.\n%s",
+    "nextQuestion": "Siguiente:\n%s",
+    "noResults": "No se encontraron fondos para: %s",
+    "resultsHeader": "¡Aquí tienes tus fondos para '%s'!:\n",
+    "error": "Hubo un error buscando los fondos: %s",
+    "llmPrompt": "El usuario buscó: '%s'.\nSe usaron estas palabras clave: '%s' pero el usuario NO está satisfecho.\nGenera una lista de 3 a 5 nuevas combinaciones de palabras clave (queries) para mejorar la búsqueda.\nDeben ser diferentes a las anteriores. Devuelve SOLO las palabras clave separadas por ' ||| '.\nEjemplo: query one ||| query two ||| query three"
+  }
+}
