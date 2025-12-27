@@ -97,60 +97,38 @@ public class ChatService {
     }
 
     private Mono<String> startSpecificFlow(String userId, String request) {
-        String prompt = "Analiza la petición: '" + request + "'.\n" +
-                        "1. Extrae palabras clave OBLIGATORIAS en INGLÉS (tema central) para buscar en Wallhaven/Google.\n" +
-                        "2. Genera 5 preguntas en ESPAÑOL para afinar. Incluye las opciones en el texto (ej: '¿Tono? (1: Claro, 10: Oscuro)').\n" +
-                        "3. Define keywords en INGLÉS para cada extremo (1 y 10).\n" +
-                        "Formato OBLIGATORIO (sin markdown, usa | como separador):\n" +
-                        "MANDATORY: kw1, kw2\n" +
-                        "Pregunta | Keyword_Bajo_Ingles | Keyword_Alto_Ingles | Peso_1_3";
+        // Enfoque determinista: Limpiamos la petición y usamos las preguntas estándar
+        String keywords = extractKeywords(request);
         
-        return aiClient.generate(prompt, true).map(response -> {
-            List<String> generatedQuestions = new ArrayList<>();
-            List<DynamicQuestion> dynamicData = new ArrayList<>();
-            List<String> mandatory = new ArrayList<>();
+        UserSession session = new UserSession();
+        session.originalRequest = keywords.isEmpty() ? request : keywords;
+        session.questions = STANDARD_QUESTIONS;
+        session.isStandard = true;
+        sessions.put(userId, session);
 
-            for (String line : response.split("\\n")) {
-                String cleanLine = line.replaceAll("[*`]", "").trim();
-                if (cleanLine.toUpperCase().startsWith("MANDATORY:")) {
-                    String[] parts = cleanLine.substring(10).split("[,\\s]+");
-                    for (String p : parts) if (!p.isEmpty()) mandatory.add(p.trim());
-                } else if (cleanLine.contains("|")) {
-                    String[] parts = cleanLine.split("\\|");
-                    if (parts.length >= 4) {
-                        String q = parts[0].trim();
-                        generatedQuestions.add(q);
-                        int w = 1;
-                        try { w = Integer.parseInt(parts[3].trim()); } catch (Exception e) {}
-                        dynamicData.add(new DynamicQuestion(q, parts[1].trim(), parts[2].trim(), w));
-                    }
-                }
-            }
-            
-            if (generatedQuestions.isEmpty()) {
-                generatedQuestions = List.of("1. ¿Luminosidad? (1-10)", "2. ¿Color? (1-10)", "3. ¿Estilo? (1-10)", "4. ¿Complejidad? (1-10)", "5. ¿Vibe? (1-10)");
-                dynamicData.add(new DynamicQuestion("1. ¿Luminosidad?", "bright", "dark", 1));
-                dynamicData.add(new DynamicQuestion("2. ¿Color?", "monochrome", "colorful", 1));
-                dynamicData.add(new DynamicQuestion("3. ¿Estilo?", "abstract", "realistic", 1));
-                dynamicData.add(new DynamicQuestion("4. ¿Complejidad?", "minimalist", "detailed", 1));
-                dynamicData.add(new DynamicQuestion("5. ¿Vibe?", "calm", "energetic", 1));
-            }
-
-            if (mandatory.isEmpty()) mandatory.add(request);
-
-            UserSession session = new UserSession();
-            session.originalRequest = request;
-            session.questions = generatedQuestions;
-            session.dynamicQuestions = dynamicData;
-            session.mandatoryKeywords = mandatory;
-            sessions.put(userId, session);
-
-            return "Entendido. Para afinar tu búsqueda, responde del 1 al 10:\n" + generatedQuestions.get(0);
-        });
+        return Mono.just("Entendido. Buscaré fondos sobre: '" + session.originalRequest + "'.\n" +
+                         "Para afinar los resultados, responde estas 10 preguntas (1-10):\n" + 
+                         STANDARD_QUESTIONS.get(0));
     }
 
     private Mono<String> processActiveSession(String userId, String message) {
         UserSession session = sessions.get(userId);
+
+        // 1. Verificar si estamos esperando confirmación de satisfacción
+        if (session.waitingForSatisfaction) {
+            String lower = message.trim().toLowerCase();
+            if (lower.startsWith("si") || lower.startsWith("yes") || lower.startsWith("s") || lower.contains("ok")) {
+                sessions.remove(userId);
+                return Mono.just("¡Genial! Me alegro de haber ayudado.");
+            } else {
+                // Usuario NO satisfecho -> Usar LLM para generar nuevas keywords
+                return generateAlternativeKeywordsWithLLM(session).map(newQuery -> {
+                    sessions.remove(userId);
+                    return searchAndFormat(newQuery, session.originalRequest) + "\n\nEspero que estos resultados sean mejores.";
+                });
+            }
+        }
+
         try {
             int rating = Integer.parseInt(message.trim());
             if (rating < 1 || rating > 10) throw new NumberFormatException();
@@ -165,50 +143,50 @@ public class ChatService {
             return Mono.just("Siguiente (" + (session.currentQuestionIndex + 1) + "/" + session.questions.size() + "):\n" + session.questions.get(session.currentQuestionIndex));
         } else {
             // Flujo terminado
-            Mono<String> resultMono;
-            if (session.isStandard) {
-                resultMono = Mono.just(generateStandardKeywords(session));
-            } else {
-                resultMono = Mono.just(generateWeightedKeywords(session));
-            }
-            return resultMono.map(finalResult -> {
-                sessions.remove(userId);
-                return searchAndFormat(finalResult, session.originalRequest);
-            });
+            String finalResult = generateStandardKeywords(session);
+            session.lastGeneratedQuery = finalResult;
+            session.waitingForSatisfaction = true;
+            
+            String results = searchAndFormat(finalResult, session.originalRequest);
+            return Mono.just(results + "\n\n¿Estás satisfecho con los resultados? (Sí/No)");
         }
+    }
+
+    private Mono<String> generateAlternativeKeywordsWithLLM(UserSession session) {
+        String prompt = "El usuario buscó: '" + session.originalRequest + "'.\n" +
+                        "Se usaron estas palabras clave: '" + session.lastGeneratedQuery + "' pero el usuario NO está satisfecho.\n" +
+                        "Genera una lista de 3 a 5 nuevas combinaciones de palabras clave (queries) para mejorar la búsqueda.\n" +
+                        "Deben ser diferentes a las anteriores. Devuelve SOLO las palabras clave separadas por ' ||| '.\n" +
+                        "Ejemplo: query one ||| query two ||| query three";
+        return aiClient.generate(prompt, false);
     }
 
     private String generateStandardKeywords(UserSession session) {
         StringBuilder query = new StringBuilder();
         List<Integer> answers = session.answers;
+        String base = session.originalRequest;
+        // Repetimos las palabras clave base para darles mayor peso en la búsqueda
+        String prefix = (base != null && !base.isEmpty()) ? base + " " + base + " " : "";
         
         // Bucle for que itera de 0 a 9 procesando las respuestas estándar
         for (int i = 0; i < answers.size(); i++) {
             if (i >= KEYWORD_MAPPING.size()) break;
             String[] options = KEYWORD_MAPPING.get(i);
             // Si la respuesta es > 5 usa la segunda opción (índice 1), si no la primera (índice 0)
-            query.append(answers.get(i) > 5 ? options[1] : options[0]).append(" ||| ");
+            String trait = answers.get(i) > 5 ? options[1] : options[0];
+            query.append(prefix).append(trait).append(" ||| ");
         }
         return query.toString();
     }
 
-    private String generateWeightedKeywords(UserSession session) {
-        StringBuilder query = new StringBuilder();
-        String mandatory = String.join(" ", session.mandatoryKeywords);
-        
-        // Base: Mandatory. Usamos solo las keywords procesadas (en inglés) para mejor resultado.
-        query.append(mandatory).append(" ||| ");
-
-        for (int i = 0; i < session.answers.size(); i++) {
-            if (i >= session.dynamicQuestions.size()) break;
-            DynamicQuestion dq = session.dynamicQuestions.get(i);
-            String keyword = (session.answers.get(i) > 5) ? dq.highKeyword : dq.lowKeyword;
-            
-            // Combinamos obligatorio con preferencia para asegurar relevancia
-            String combined = mandatory + " " + keyword;
-            for(int w=0; w < dq.weight; w++) query.append(combined).append(" ||| ");
-        }
-        return query.toString();
+    private String extractKeywords(String text) {
+        // Reemplazar puntuación con espacios y limpiar
+        String cleaned = text.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s]", " ");
+        String[] stopWords = {"quiero", "un", "una", "el", "la", "los", "las", "fondo", "fondos", "de", "del", "pantalla", "wallpaper", "wallpapers", "imagen", "imagenes", "foto", "fotos", "sobre", "about", "for", "picture", "pictures", "dame", "ver", "show", "me", "y", "and", "with", "con", "busco", "necesito", "tienes", "hola", "hey", "buenos", "dias"};
+        List<String> stops = Arrays.asList(stopWords);
+        return Arrays.stream(cleaned.split("\\s+"))
+                .filter(w -> !w.isEmpty() && !stops.contains(w.toLowerCase()))
+                .collect(Collectors.joining(" "));
     }
 
     private String searchAndFormat(String query, String originalRequest) {
@@ -276,21 +254,7 @@ public class ChatService {
         List<Integer> answers = new ArrayList<>();
         int currentQuestionIndex = 0;
         boolean isStandard = false;
-        List<DynamicQuestion> dynamicQuestions = new ArrayList<>();
-        List<String> mandatoryKeywords = new ArrayList<>();
-    }
-
-    private static class DynamicQuestion {
-        String text;
-        String lowKeyword;
-        String highKeyword;
-        int weight;
-
-        public DynamicQuestion(String text, String lowKeyword, String highKeyword, int weight) {
-            this.text = text;
-            this.lowKeyword = lowKeyword;
-            this.highKeyword = highKeyword;
-            this.weight = weight;
-        }
+        boolean waitingForSatisfaction = false;
+        String lastGeneratedQuery;
     }
 }
