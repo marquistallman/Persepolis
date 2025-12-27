@@ -97,21 +97,52 @@ public class ChatService {
     }
 
     private Mono<String> startSpecificFlow(String userId, String request) {
-        String prompt = "Genera 5 preguntas numeradas (1., 2., etc) para afinar la búsqueda de un fondo de pantalla basado en: '" + request + "'. Las preguntas deben ser para responder con una escala del 1 al 10.";
+        String prompt = "Analiza la petición: '" + request + "'.\n" +
+                        "1. Extrae palabras clave OBLIGATORIAS en INGLÉS (tema central) para buscar en Wallhaven/Google.\n" +
+                        "2. Genera 5 preguntas en ESPAÑOL para afinar. Incluye las opciones en el texto (ej: '¿Tono? (1: Claro, 10: Oscuro)').\n" +
+                        "3. Define keywords en INGLÉS para cada extremo (1 y 10).\n" +
+                        "Formato OBLIGATORIO (sin markdown, usa | como separador):\n" +
+                        "MANDATORY: kw1, kw2\n" +
+                        "Pregunta | Keyword_Bajo_Ingles | Keyword_Alto_Ingles | Peso_1_3";
         
         return aiClient.generate(prompt, true).map(response -> {
-            List<String> generatedQuestions = Arrays.stream(response.split("\\n"))
-                    .filter(line -> line.matches("^\\d+\\..*"))
-                    .limit(5)
-                    .collect(Collectors.toList());
+            List<String> generatedQuestions = new ArrayList<>();
+            List<DynamicQuestion> dynamicData = new ArrayList<>();
+            List<String> mandatory = new ArrayList<>();
+
+            for (String line : response.split("\\n")) {
+                String cleanLine = line.replaceAll("[*`]", "").trim();
+                if (cleanLine.toUpperCase().startsWith("MANDATORY:")) {
+                    String[] parts = cleanLine.substring(10).split("[,\\s]+");
+                    for (String p : parts) if (!p.isEmpty()) mandatory.add(p.trim());
+                } else if (cleanLine.contains("|")) {
+                    String[] parts = cleanLine.split("\\|");
+                    if (parts.length >= 4) {
+                        String q = parts[0].trim();
+                        generatedQuestions.add(q);
+                        int w = 1;
+                        try { w = Integer.parseInt(parts[3].trim()); } catch (Exception e) {}
+                        dynamicData.add(new DynamicQuestion(q, parts[1].trim(), parts[2].trim(), w));
+                    }
+                }
+            }
             
             if (generatedQuestions.isEmpty()) {
                 generatedQuestions = List.of("1. ¿Luminosidad? (1-10)", "2. ¿Color? (1-10)", "3. ¿Estilo? (1-10)", "4. ¿Complejidad? (1-10)", "5. ¿Vibe? (1-10)");
+                dynamicData.add(new DynamicQuestion("1. ¿Luminosidad?", "bright", "dark", 1));
+                dynamicData.add(new DynamicQuestion("2. ¿Color?", "monochrome", "colorful", 1));
+                dynamicData.add(new DynamicQuestion("3. ¿Estilo?", "abstract", "realistic", 1));
+                dynamicData.add(new DynamicQuestion("4. ¿Complejidad?", "minimalist", "detailed", 1));
+                dynamicData.add(new DynamicQuestion("5. ¿Vibe?", "calm", "energetic", 1));
             }
+
+            if (mandatory.isEmpty()) mandatory.add(request);
 
             UserSession session = new UserSession();
             session.originalRequest = request;
             session.questions = generatedQuestions;
+            session.dynamicQuestions = dynamicData;
+            session.mandatoryKeywords = mandatory;
             sessions.put(userId, session);
 
             return "Entendido. Para afinar tu búsqueda, responde del 1 al 10:\n" + generatedQuestions.get(0);
@@ -138,11 +169,11 @@ public class ChatService {
             if (session.isStandard) {
                 resultMono = Mono.just(generateStandardKeywords(session));
             } else {
-                resultMono = generateKeywordsFromAI(session);
+                resultMono = Mono.just(generateWeightedKeywords(session));
             }
             return resultMono.map(finalResult -> {
                 sessions.remove(userId);
-                return searchAndFormat(finalResult);
+                return searchAndFormat(finalResult, session.originalRequest);
             });
         }
     }
@@ -156,32 +187,87 @@ public class ChatService {
             if (i >= KEYWORD_MAPPING.size()) break;
             String[] options = KEYWORD_MAPPING.get(i);
             // Si la respuesta es > 5 usa la segunda opción (índice 1), si no la primera (índice 0)
-            query.append(answers.get(i) > 5 ? options[1] : options[0]).append(" ");
+            query.append(answers.get(i) > 5 ? options[1] : options[0]).append(" ||| ");
         }
-        return query.toString().trim();
+        return query.toString();
     }
 
-    private Mono<String> generateKeywordsFromAI(UserSession session) {
-        String prompt = "Genera palabras clave de búsqueda para: '" + session.originalRequest + "' considerando estos valores (1-10) para las preguntas anteriores: " + session.answers;
-        return aiClient.generate(prompt, false);
+    private String generateWeightedKeywords(UserSession session) {
+        StringBuilder query = new StringBuilder();
+        String mandatory = String.join(" ", session.mandatoryKeywords);
+        
+        // Base: Mandatory. Usamos solo las keywords procesadas (en inglés) para mejor resultado.
+        query.append(mandatory).append(" ||| ");
+
+        for (int i = 0; i < session.answers.size(); i++) {
+            if (i >= session.dynamicQuestions.size()) break;
+            DynamicQuestion dq = session.dynamicQuestions.get(i);
+            String keyword = (session.answers.get(i) > 5) ? dq.highKeyword : dq.lowKeyword;
+            
+            // Combinamos obligatorio con preferencia para asegurar relevancia
+            String combined = mandatory + " " + keyword;
+            for(int w=0; w < dq.weight; w++) query.append(combined).append(" ||| ");
+        }
+        return query.toString();
     }
 
-    private String searchAndFormat(String query) {
+    private String searchAndFormat(String query, String originalRequest) {
         try {
             CScrap scraper = new CScrap();
-            List<Map<String, String>> results = scraper.buscarWeb(query);
+            String[] keywords = query.split("\\|\\|\\|");
+            Map<String, List<Map<String, String>>> searchCache = new HashMap<>();
+            Map<Map<String, String>, Integer> resultCounts = new HashMap<>();
+
+            for (String keyword : keywords) {
+                String k = keyword.trim();
+                if (k.isEmpty()) continue;
+                
+                // Usamos caché para no llamar al scraper múltiples veces por la misma palabra (debido al peso)
+                List<Map<String, String>> results = searchCache.computeIfAbsent(k, key -> scraper.buscarWeb(key));
+                
+                if (results != null) {
+                    for (Map<String, String> result : results) {
+                        if (isSupportContent(result)) continue;
+                        resultCounts.put(result, resultCounts.getOrDefault(result, 0) + 1);
+                    }
+                }
+            }
             
-            if (results == null || results.isEmpty()) {
+            if (resultCounts.isEmpty()) {
                 return "No se encontraron fondos para: " + query;
             }
-            StringBuilder sb = new StringBuilder("¡Aquí tienes tus fondos para '" + query + "'!:\n");
-            for (Map<String, String> result : results) {
-                sb.append(result.values()).append("\n");
+
+            List<Map.Entry<Map<String, String>, Integer>> sortedResults = new ArrayList<>(resultCounts.entrySet());
+            sortedResults.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+            StringBuilder sb = new StringBuilder("¡Aquí tienes tus fondos para '" + originalRequest + "'!:\n");
+            for (Map.Entry<Map<String, String>, Integer> entry : sortedResults) {
+                sb.append(entry.getKey().values()).append("\n");
             }
             return sb.toString();
         } catch (Exception e) {
             return "Hubo un error buscando los fondos: " + e.getMessage();
         }
+    }
+
+    private boolean isSupportContent(Map<String, String> result) {
+        for (String val : result.values()) {
+            if (val == null) continue;
+            String v = val.toLowerCase();
+            if (v.contains("support") || v.contains("help") || v.contains("contact") || 
+                v.contains("faq") || v.contains("policy") || v.contains("terms")) return true;
+            
+            // Filtros de limpieza (categorías, tutoriales, login)
+            if (v.contains("/category/") || v.contains("/tag/") || v.contains("how to set") || 
+                v.contains("login") || v.contains("signup") || v.contains("register")) return true;
+            
+            // Filtrar homepages (URLs cortas sin path)
+            if (v.startsWith("http")) {
+                String url = v.endsWith("/") ? v.substring(0, v.length() - 1) : v;
+                if (url.split("/").length <= 3) return true;
+            }
+        }
+        return false;
     }
 
     private static class UserSession {
@@ -190,5 +276,21 @@ public class ChatService {
         List<Integer> answers = new ArrayList<>();
         int currentQuestionIndex = 0;
         boolean isStandard = false;
+        List<DynamicQuestion> dynamicQuestions = new ArrayList<>();
+        List<String> mandatoryKeywords = new ArrayList<>();
+    }
+
+    private static class DynamicQuestion {
+        String text;
+        String lowKeyword;
+        String highKeyword;
+        int weight;
+
+        public DynamicQuestion(String text, String lowKeyword, String highKeyword, int weight) {
+            this.text = text;
+            this.lowKeyword = lowKeyword;
+            this.highKeyword = highKeyword;
+            this.weight = weight;
+        }
     }
 }
