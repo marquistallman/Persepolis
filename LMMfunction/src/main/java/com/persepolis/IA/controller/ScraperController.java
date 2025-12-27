@@ -4,13 +4,15 @@ import com.persepolis.IA.Scraper.CScrap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen (necesario para conectar con el Front)
 public class ScraperController {
 
-    @GetMapping("/scraper")
+    @GetMapping(value = "/scraper", produces = "application/json")
     public List<Map<String, String>> buscar(@RequestParam(name = "q", defaultValue = "anime") String query) {
         // Instanciamos el scraper
         CScrap scraper = new CScrap();
@@ -19,4 +21,3 @@ public class ScraperController {
         return scraper.buscarWeb(query);
     }
 }
-
