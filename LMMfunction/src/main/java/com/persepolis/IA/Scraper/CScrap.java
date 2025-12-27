@@ -81,6 +81,24 @@ public class CScrap {
                 "/main/",
                 new String[]{"h3.product-title a", "a[href*='/dl/']"} 
         ));
+                
+                sitiosConfigurados.add(new ConfiguracionSitio(
+        
+                "Wallpaper Abyss",
+                "https://wall.alphacoders.com/",
+                "search",
+                "search.php",
+                new String[]{"div.boxgrid a", ".center-container a"} 
+        ));
+
+                sitiosConfigurados.add(new ConfiguracionSitio(
+        
+                "Peakpx",
+                "https://www.peakpx.com/",
+                "q",
+                "en/search",
+                new String[]{"figure a", "#search-list li a"} 
+        ));
                
     }
     
@@ -111,6 +129,14 @@ public class CScrap {
         
         else if (config.nombre.equals("Moe Walls")) {
             return config.urlBase + "?s=" + URLEncoder.encode(busqueda, "UTF-8");
+        }
+        
+        else if (config.nombre.equals("Wallpaper Abyss")) {
+            return config.urlBase + "search.php?search=" + URLEncoder.encode(busqueda, "UTF-8");
+        }
+        
+        else if (config.nombre.equals("Peakpx")) {
+            return config.urlBase + "en/search?q=" + URLEncoder.encode(busqueda, "UTF-8");
         }
         return config.urlBase;
         
@@ -283,6 +309,34 @@ public class CScrap {
     datos.put("enlace", enlace);
     datos.put("info", info); 
 
+        }
+        
+        else if (config.nombre.equals("Wallpaper Abyss")) {
+            String enlace = elemento.attr("href");
+            if (!enlace.startsWith("http")) {
+                enlace = "https://wall.alphacoders.com/" + enlace;
+            }
+            String titulo = elemento.attr("title");
+            if (titulo.isEmpty()) {
+                Element img = elemento.selectFirst("img");
+                if (img != null) titulo = img.attr("alt");
+            }
+            datos.put("titulo", titulo.isEmpty() ? "Wallpaper Abyss" : titulo);
+            datos.put("enlace", enlace);
+            datos.put("tipo", "Wallpaper Abyss");
+        }
+        
+        else if (config.nombre.equals("Peakpx")) {
+            String enlace = elemento.attr("href");
+            if (!enlace.startsWith("http")) {
+                enlace = "https://www.peakpx.com" + enlace;
+            }
+            Element img = elemento.selectFirst("img");
+            String titulo = (img != null) ? img.attr("alt") : "Peakpx Wallpaper";
+            
+            datos.put("titulo", titulo);
+            datos.put("enlace", enlace);
+            datos.put("tipo", "Peakpx");
         }
         
         return datos;
