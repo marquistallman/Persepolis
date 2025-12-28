@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered search results for Persepolis IA wallpapers. Discover filtered wallpapers with category tags, download counts, and advanced sorting options.">
+    <title>Search Results - Persepolis IA</title>
+    <link rel="stylesheet" href="../css/main.css">
+
+<script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fwallpaperh3057back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
+<script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+</head>
+<body class="bg-background">
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 bg-background-light/95 backdrop-blur-sm border-b border-border shadow-subtle">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Brand Name -->
+                <a href="homepage.html" class="group">
+                    <span class="font-headline text-2xl font-bold text-primary group-hover:text-accent transition-colors">Persepolis IA</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="homepage.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
+                    <a href="browse.html" class="text-text-secondary hover:text-accent transition-colors">Browse</a>
+                </div>
+
+                <!-- Search & Actions -->
+                <div class="flex items-center gap-4">
+                    <button class="hidden md:flex items-center gap-2 px-4 py-2 bg-surface rounded-lg hover:bg-surface-dark transition-colors focus-ring" aria-label="Search wallpapers">
+                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_194eeb027-1764656322629.png" alt="Search icon" class="w-5 h-5">
+                        <span class="text-text-secondary text-sm">Search...</span>
+                    </button>
+                    <button class="p-2 hover:bg-surface rounded-lg transition-colors focus-ring" aria-label="Favorites">
+                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_16cc80808-1766786756456.png" alt="Favorites icon" class="w-6 h-6">
+                    </button>
+                    <button class="md:hidden p-2 hover:bg-surface rounded-lg transition-colors" aria-label="Menu">
+                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1b5957374-1766482728093.png" alt="Menu icon" class="w-6 h-6">
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <section class="bg-background-light border-b border-border">
+        <div class="container mx-auto px-4 py-4">
+            <nav class="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+                <a href="homepage.html" class="text-text-secondary hover:text-primary transition-colors">Home</a>
+                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_17e2a58be-1765643541919.png" alt="Breadcrumb separator" class="w-4 h-4">
+                <span class="text-primary font-medium">Search Results</span>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Search Context Banner -->
+    <section class="bg-gradient-to-r from-accent/10 to-primary/10 border-b border-border">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="font-headline text-3xl md:text-4xl mb-2">Search Results</h1>
+                    <p class="text-text-secondary">
+                        Showing results for: <span id="searchQuery" class="font-semibold text-primary">"nature wallpapers"</span>
+                    </p>
+                </div>
+                <button id="modifySearchBtn" class="btn-outline flex items-center gap-2">
+                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_194eeb027-1764656322629.png" alt="Search icon" class="w-5 h-5">
+                    Modify Search
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Search Results Section -->
+    <section class="py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Filter Sidebar -->
+                <aside class="lg:w-80 flex-shrink-0">
+                    <div class="sticky top-24 space-y-6">
+                        <!-- Search Refinement Bar -->
+                        <div class="card p-4">
+                            <h3 class="font-semibold text-lg mb-4">Refine Your Search</h3>
+                            <div class="relative">
+                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_194eeb027-1764656322629.png" alt="Search icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5">
+                                <input 
+                                    type="text" 
+                                    id="refineSearchInput"
+                                    placeholder="Add more keywords..." 
+                                    class="w-full pl-10 pr-4 py-3 border border-border rounded-lg focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                    aria-label="Refine search">
+                            </div>
+                            <div id="searchAutoComplete" class="mt-2 hidden">
+                                <div class="text-xs text-text-secondary mb-2">Suggestions:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-accent hover:text-white transition-colors">4K resolution</button>
+                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-accent hover:text-white transition-colors">landscape</button>
+                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-accent hover:text-white transition-colors">mountains</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Controls -->
+                        <div class="card p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-semibold text-lg">Filters</h3>
+                                <button id="resetFilters" class="text-accent text-sm hover:text-accent-600 transition-colors flex items-center gap-1">
+                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_148148b2b-1765208784425.png" alt="Reset icon" class="w-4 h-4">
+                                    Reset
+                                </button>
+                            </div>
+
+                            <!-- AI Relevance Score -->
+                            <div class="mb-6 p-3 bg-accent/10 rounded-lg border border-accent/20">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-5 h-5">
+                                    <span class="text-sm font-medium text-accent">AI-Powered Results</span>
+                                </div>
+                                <p class="text-xs text-text-secondary">Results are sorted by relevance using our AI algorithm</p>
+                            </div>
+
+                            <!-- Categories -->
+                            <div class="mb-6">
+                                <h4 class="font-medium text-sm text-text-secondary mb-3">Categories</h4>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent" checked>
+                                        <span class="text-sm group-hover:text-primary transition-colors">All Categories</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">3,240</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent" checked>
+                                        <span class="text-sm group-hover:text-primary transition-colors">Nature</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">1,850</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Abstract</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">620</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Minimalist</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">380</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Photography</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">290</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Digital Art</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">100</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Color Palette Picker -->
+                            <div class="mb-6">
+                                <h4 class="font-medium text-sm text-text-secondary mb-3">Color Palette</h4>
+                                <div class="grid grid-cols-6 gap-2">
+                                    <button class="w-10 h-10 rounded-lg bg-red-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Red color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-orange-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Orange color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-yellow-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Yellow color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-green-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Green color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-blue-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Blue color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-purple-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Purple color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-pink-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Pink color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-gray-800 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Black color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-white border border-border hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="White color filter"></button>
+                                    <button class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 via-yellow-500 to-blue-500 hover:ring-2 hover:ring-accent hover:ring-offset-2 transition-all focus-ring" aria-label="Multicolor filter"></button>
+                                </div>
+                            </div>
+
+                            <!-- Resolution Selector -->
+                            <div class="mb-6">
+                                <h4 class="font-medium text-sm text-text-secondary mb-3">Resolution</h4>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" name="resolution" class="w-4 h-4 text-accent border-border focus:ring-accent" checked>
+                                        <span class="text-sm group-hover:text-primary transition-colors">All Resolutions</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" name="resolution" class="w-4 h-4 text-accent border-border focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">4K (3840x2160)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" name="resolution" class="w-4 h-4 text-accent border-border focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Full HD (1920x1080)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" name="resolution" class="w-4 h-4 text-accent border-border focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Mobile (1080x1920)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Orientation Filters -->
+                            <div class="mb-6">
+                                <h4 class="font-medium text-sm text-text-secondary mb-3">Orientation</h4>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button class="px-4 py-2 border-2 border-accent bg-accent text-white rounded-lg text-sm font-medium transition-colors">
+                                        All
+                                    </button>
+                                    <button class="px-4 py-2 border-2 border-border text-text-secondary rounded-lg text-sm font-medium hover:border-accent hover:text-accent transition-colors">
+                                        Landscape
+                                    </button>
+                                    <button class="px-4 py-2 border-2 border-border text-text-secondary rounded-lg text-sm font-medium hover:border-accent hover:text-accent transition-colors">
+                                        Portrait
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Mood/Style Tags -->
+                            <div>
+                                <h4 class="font-medium text-sm text-text-secondary mb-3">Mood & Style</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Peaceful</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Vibrant</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Dark</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Light</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Dramatic</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Calm</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <main class="flex-1">
+                    <!-- Toolbar -->
+                    <div class="card p-4 mb-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <!-- Results Count & Bulk Actions -->
+                            <div class="flex items-center gap-4">
+                                <p class="text-text-secondary">
+                                    <span class="font-semibold text-primary" id="resultsCount">3,240</span> results found
+                                </p>
+                                <button id="bulkSelectBtn" class="text-sm text-accent hover:text-accent-600 transition-colors flex items-center gap-1">
+                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_177fb76fc-1764634750407.png" alt="Bulk select icon" class="w-4 h-4">
+                                    Bulk Select
+                                </button>
+                            </div>
+
+                            <!-- View Options & Sort -->
+                            <div class="flex items-center gap-4">
+                                <!-- Grid Size Toggle -->
+                                <div class="flex items-center gap-2 border border-border rounded-lg p-1">
+                                    <button id="gridSmall" class="p-2 rounded hover:bg-surface transition-colors" aria-label="Small grid view">
+                                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1d0ef08a0-1766733014866.png" alt="Small grid icon" class="w-5 h-5">
+                                    </button>
+                                    <button id="gridMedium" class="p-2 rounded bg-surface transition-colors" aria-label="Medium grid view">
+                                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1d0ef08a0-1766733014866.png" alt="Medium grid icon" class="w-5 h-5">
+                                    </button>
+                                    <button id="gridLarge" class="p-2 rounded hover:bg-surface transition-colors" aria-label="Large grid view">
+                                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1d0ef08a0-1766733014866.png" alt="Large grid icon" class="w-5 h-5">
+                                    </button>
+                                </div>
+
+                                <!-- Sort Dropdown -->
+                                <div class="relative">
+                                    <select id="sortSelect" class="px-4 py-2 border border-border rounded-lg bg-background-light focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 cursor-pointer" aria-label="Sort wallpapers">
+                                        <option value="relevance">Best Match</option>
+                                        <option value="popular">Most Popular</option>
+                                        <option value="newest">Newest First</option>
+                                        <option value="downloads">Most Downloads</option>
+                                        <option value="rated">Highest Rated</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Filters Display -->
+                    <div id="activeFilters" class="mb-6 flex flex-wrap gap-2">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/20 text-accent text-sm rounded-full">
+                            Nature
+                            <button class="hover:text-accent-600" aria-label="Remove filter">×</button>
+                        </span>
+                    </div>
+
+                    <!-- Wallpaper Gallery Grid -->
+                    <div id="wallpaperGrid" class="gallery-grid">
+                        <!-- Wallpaper Item 1 - High Relevance -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="nature" data-relevance="98">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1704625448122-a93f976eb1af" 
+                                    alt="Majestic snow-capped mountain range at golden hour with dramatic clouds" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg?auto=compress&cs=tinysrgb&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-success text-xs">Nature</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                98% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Alpine Majesty</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    8.2K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    2.1K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 2 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="nature" data-relevance="95">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1723459640576-560af9d58f55" 
+                                    alt="Tropical paradise beach with turquoise water and palm trees swaying" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-success text-xs">Nature</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                95% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Tropical Escape</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    11.2K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    3.4K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 3 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="nature" data-relevance="92">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1720269023425-7db22ded7c8c" 
+                                    alt="Serene forest path with sunbeams filtering through tall trees" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg?auto=compress&cs=tinysrgb&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-success text-xs">Nature</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                92% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Forest Light</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    9.3K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    2.8K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 4 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="nature" data-relevance="89">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1716369414995-9354c3d18c17" 
+                                    alt="Stunning aurora borealis dancing over snowy mountain landscape at night" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-success text-xs">Nature</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                89% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Northern Lights</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    15.3K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    4.2K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 5 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="abstract" data-relevance="85">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1646388286288-476b7329e2e0" 
+                                    alt="Vibrant abstract gradient flowing from deep blue to electric purple" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://img.rocket.new/generatedImages/rocket_gen_img_104abccaa-1764813785194.png'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-primary text-xs">Abstract</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                85% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Gradient Dreams</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    12.5K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    3.8K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 6 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="minimalist" data-relevance="82">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1669428191324-6e86d01ea65e" 
+                                    alt="Clean minimalist geometric pattern with soft beige and white tones" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-warning text-xs">Minimalist</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                82% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Zen Geometry</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    6.7K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    1.9K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 7 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="photography" data-relevance="78">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1606219046247-b262b2c184af" 
+                                    alt="Urban cityscape at night with illuminated skyscrapers reflecting in water" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.pexels.com/photos/1287145/pexels-photo-1287145.jpeg?auto=compress&cs=tinysrgb&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-success text-xs">Photography</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                78% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">City Reflections</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    7.9K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    2.3K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 8 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="digital-art" data-relevance="75">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1711989063599-cccd3ca47a85" 
+                                    alt="Dreamy pastel watercolor blend with soft pink and blue hues" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.pixabay.com/photo/2017/02/12/21/29/false-2061131_1280.png'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-primary text-xs">Digital Art</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                75% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Pastel Clouds</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    9.8K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    2.7K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 9 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="abstract" data-relevance="72">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1597209611117-4944ba688cd9" 
+                                    alt="Cosmic milky way galaxy with countless stars over mountain silhouette" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-primary text-xs">Abstract</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                72% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Cosmic Wonder</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    14.1K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    4.5K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 10 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="minimalist" data-relevance="68">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1668695864558-88ef766f97c4" 
+                                    alt="Minimalist architectural design with clean white lines and shadows" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.pexels.com/photos/1089438/pexels-photo-1089438.jpeg?auto=compress&cs=tinysrgb&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-warning text-xs">Minimalist</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                68% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Pure Architecture</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    8.4K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    2.6K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 11 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="digital-art" data-relevance="65">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_104abccaa-1764813785194.png" 
+                                    alt="Futuristic neon cityscape with cyberpunk aesthetic and glowing lights" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-primary text-xs">Digital Art</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                65% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Neon Dreams</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    10.7K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    3.1K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wallpaper Item 12 -->
+                        <div class="card hover-lift group cursor-pointer wallpaper-item" data-category="seasonal" data-relevance="62">
+                            <div class="image-container aspect-wallpaper">
+                                <img src="https://images.unsplash.com/photo-1552844775-b408769124a5" 
+                                    alt="Cozy autumn scene with golden leaves and warm afternoon sunlight" 
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onerror="this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800'; this.onerror=null;">
+                                <div class="image-overlay flex flex-col justify-between p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="badge badge-warning text-xs">Seasonal</span>
+                                            <span class="badge bg-accent/20 text-accent text-xs flex items-center gap-1">
+                                                <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-3 h-3">
+                                                62% Match
+                                            </span>
+                                        </div>
+                                        <button class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Add to favorites">
+                                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1876442e1-1765250551228.png" alt="Favorite icon" class="w-5 h-5">
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-semibold text-lg mb-2">Autumn Warmth</h3>
+                                        <div class="flex items-center justify-between text-white/80 text-sm">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                                                    5.6K
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                                                    1.8K
+                                                </span>
+                                            </div>
+                                            <span class="text-xs">4K</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Load More Button -->
+                    <div class="mt-12 text-center">
+                        <button id="loadMoreBtn" class="btn-primary px-8 py-4 text-lg">
+                            <span>Load More Results</span>
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c8eb8633-1765284080467.png" alt="Load more icon" class="w-5 h-5">
+                        </button>
+                        <p class="text-text-secondary text-sm mt-4">Showing 12 of 3,240 results</p>
+                    </div>
+
+                    <!-- Search Analytics Section -->
+                    <div class="card p-6 mt-8">
+                        <h3 class="font-semibold text-lg mb-4">Search Insights</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-accent">98%</p>
+                                <p class="text-sm text-text-secondary">Best Match</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-primary">3,240</p>
+                                <p class="text-sm text-text-secondary">Total Results</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-success">12.5K</p>
+                                <p class="text-sm text-text-secondary">Avg. Downloads</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-secondary">4K</p>
+                                <p class="text-sm text-text-secondary">Resolution</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Preview Modal -->
+    <div id="previewModal" class="modal-overlay hidden items-center justify-center">
+        <div class="modal-content max-w-5xl">
+            <div class="relative">
+                <button id="closeModal" class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Close preview">
+                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1d533db9c-1766571610545.png" alt="Close icon" class="w-6 h-6">
+                </button>
+                <img id="previewImage" src="" alt="Wallpaper preview" class="w-full h-auto rounded-t-xl">
+                <div class="p-6 bg-background-light rounded-b-xl">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 id="previewTitle" class="font-headline text-2xl mb-2">Wallpaper Title</h3>
+                            <p class="text-text-secondary">By <span id="previewCreator" class="text-primary font-medium">Featured Creator</span></p>
+                        </div>
+                        <button class="btn-accent">
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_146cfa0c8-1764649038136.png" alt="Download icon" class="w-5 h-5">
+                            Download
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm text-text-secondary">
+                        <span class="flex items-center gap-2">
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c1857cda-1764987400448.png" alt="Downloads" class="w-4 h-4">
+                            <span id="previewDownloads">0</span> downloads
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <img src="https://images.unsplash.com/photo-1555020376-483093c2efae" alt="Likes" class="w-4 h-4">
+                            <span id="previewLikes">0</span> likes
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <img src="https://images.unsplash.com/photo-1609189881391-aa3d820bf052" alt="Resolution" class="w-4 h-4">
+                            4K Resolution
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-4 h-4">
+                            <span id="previewRelevance">0</span>% Match
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-primary-900 text-white py-16 mt-20">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <!-- Brand Column -->
+                <div>
+                    <div class="mb-4">
+                        <span class="font-headline text-2xl font-bold">Persepolis IA</span>
+                    </div>
+                    <p class="text-white/70 mb-4">Transform your digital space with AI-powered, curated wallpapers.</p>
+                    <div class="flex gap-4">
+                        <a href="javascript:void(0)" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Instagram">
+                            <img src="https://images.unsplash.com/photo-1698399480524-c6b256c2fe80" alt="Instagram" class="w-5 h-5">
+                        </a>
+                        <a href="javascript:void(0)" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Twitter">
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_134368182-1766477199416.png" alt="Twitter" class="w-5 h-5">
+                        </a>
+                        <a href="javascript:void(0)" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Pinterest">
+                            <img src="https://images.unsplash.com/photo-1533228195795-ee0060754ef3" alt="Pinterest" class="w-5 h-5">
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Explore Column -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Explore</h3>
+                    <ul class="space-y-3">
+                        <li><a href="browse.html" class="text-white/70 hover:text-white transition-colors">Browse Wallpapers</a></li>
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Trending</a></li>
+                    </ul>
+                </div>
+
+                <!-- Resources Column -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Resources</h3>
+                    <ul class="space-y-3">
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Setup Guides</a></li>
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Wallpaper Trends</a></li>
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Blog</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company Column -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Company</h3>
+                    <ul class="space-y-3">
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/70 text-sm">© 2025 Persepolis IA. All Rights Reserved.</p>
+                <div class="flex gap-6 text-sm">
+                    <a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Licensing</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Search refinement functionality with debounce
+        let searchTimeout;
+        const refineSearchInput = document.getElementById('refineSearchInput');
+        const searchAutoComplete = document.getElementById('searchAutoComplete');
+        
+        refineSearchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const value = e.target.value.trim();
+            
+            if (value.length > 0) {
+                searchAutoComplete.classList.remove('hidden');
+                searchTimeout = setTimeout(() => {
+                    // Simulate AI-powered search refinement
+                    console.log('Refining search with:', value);
+                }, 300);
+            } else {
+                searchAutoComplete.classList.add('hidden');
+            }
+        });
+
+        // Modify search button
+        document.getElementById('modifySearchBtn').addEventListener('click', () => {
+            refineSearchInput.focus();
+        });
+
+        // Reset filters
+        document.getElementById('resetFilters').addEventListener('click', () => {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = cb.parentElement.querySelector('span').textContent.includes('All');
+            });
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.checked = radio.parentElement.querySelector('span').textContent.includes('All');
+            });
+            refineSearchInput.value = '';
+            showAllWallpapers();
+        });
+
+        // Show all wallpapers
+        function showAllWallpapers() {
+            const items = document.querySelectorAll('.wallpaper-item');
+            items.forEach(item => item.style.display = 'block');
+            updateResultsCount(items.length);
+        }
+
+        // Update results count
+        function updateResultsCount(count) {
+            document.getElementById('resultsCount').textContent = count.toLocaleString();
+        }
+
+        // Grid view toggle
+        const gridButtons = {
+            small: document.getElementById('gridSmall'),
+            medium: document.getElementById('gridMedium'),
+            large: document.getElementById('gridLarge')
+        };
+        
+        const wallpaperGrid = document.getElementById('wallpaperGrid');
+        
+        Object.entries(gridButtons).forEach(([size, button]) => {
+            button.addEventListener('click', () => {
+                Object.values(gridButtons).forEach(btn => btn.classList.remove('bg-surface'));
+                button.classList.add('bg-surface');
+                
+                wallpaperGrid.className = 'grid gap-6';
+                if (size === 'small') {
+                    wallpaperGrid.classList.add('grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'xl:grid-cols-5');
+                } else if (size === 'medium') {
+                    wallpaperGrid.classList.add('grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+                } else {
+                    wallpaperGrid.classList.add('grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3');
+                }
+            });
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            const sortBy = e.target.value;
+            const items = Array.from(document.querySelectorAll('.wallpaper-item'));
+            
+            items.sort((a, b) => {
+                if (sortBy === 'relevance') {
+                    return parseInt(b.dataset.relevance) - parseInt(a.dataset.relevance);
+                } else if (sortBy === 'downloads') {
+                    const aDownloads = parseFloat(a.querySelector('.flex.items-center.gap-1:first-of-type').textContent.trim());
+                    const bDownloads = parseFloat(b.querySelector('.flex.items-center.gap-1:first-of-type').textContent.trim());
+                    return bDownloads - aDownloads;
+                }
+                return 0;
+            });
+            
+            items.forEach(item => wallpaperGrid.appendChild(item));
+        });
+
+        // Quick preview modal
+        const previewModal = document.getElementById('previewModal');
+        const closeModal = document.getElementById('closeModal');
+        const wallpaperItems = document.querySelectorAll('.wallpaper-item');
+        
+        wallpaperItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const img = item.querySelector('img');
+                const title = item.querySelector('h3').textContent;
+                const downloads = item.querySelector('.flex.items-center.gap-3 span:first-child').textContent.trim();
+                const likes = item.querySelector('.flex.items-center.gap-3 span:last-child').textContent.trim();
+                const relevance = item.dataset.relevance;
+                
+                document.getElementById('previewImage').src = img.src;
+                document.getElementById('previewImage').alt = img.alt;
+                document.getElementById('previewTitle').textContent = title;
+                document.getElementById('previewDownloads').textContent = downloads;
+                document.getElementById('previewLikes').textContent = likes;
+                document.getElementById('previewRelevance').textContent = relevance;
+                
+                previewModal.classList.remove('hidden');
+                previewModal.classList.add('flex');
+            });
+        });
+        
+        closeModal.addEventListener('click', () => {
+            previewModal.classList.add('hidden');
+            previewModal.classList.remove('flex');
+        });
+        
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) {
+                previewModal.classList.add('hidden');
+                previewModal.classList.remove('flex');
+            }
+        });
+
+        // Load more functionality
+        document.getElementById('loadMoreBtn').addEventListener('click', () => {
+            const btn = document.getElementById('loadMoreBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Loading...</span>';
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Load More Results</span><img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c8eb8633-1765284080467.png" alt="Load more icon" class="w-5 h-5">';
+            }, 1000);
+        });
+
+        // Bulk select functionality
+        let bulkSelectMode = false;
+        document.getElementById('bulkSelectBtn').addEventListener('click', () => {
+            bulkSelectMode = !bulkSelectMode;
+            const btn = document.getElementById('bulkSelectBtn');
+            
+            if (bulkSelectMode) {
+                btn.innerHTML = '<img src="https://img.rocket.new/generatedImages/rocket_gen_img_148148b2b-1765208784425.png" alt="Cancel icon" class="w-4 h-4">Cancel Selection';
+                wallpaperItems.forEach(item => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'absolute top-4 left-4 w-5 h-5 z-10 bulk-checkbox';
+                    item.querySelector('.image-container').appendChild(checkbox);
+                });
+            } else {
+                btn.innerHTML = '<img src="https://img.rocket.new/generatedImages/rocket_gen_img_177fb76fc-1764634750407.png" alt="Bulk select icon" class="w-4 h-4">Bulk Select';
+                document.querySelectorAll('.bulk-checkbox').forEach(cb => cb.remove());
+            }
+        });
+
+        // Lazy loading observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '50px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.wallpaper-item').forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>
