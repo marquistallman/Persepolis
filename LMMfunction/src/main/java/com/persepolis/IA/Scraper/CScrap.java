@@ -34,7 +34,7 @@ public class CScrap {
                 "https://wallpaperwaves.com/",
                 "s",
                 "/",
-                new String[]{"h3.jeg_post_title a", "a[href*='wallpaper']"} 
+                new String[]{"article.jeg_post"} 
         ));
         
                 sitiosConfigurados.add(new ConfiguracionSitio(
@@ -62,7 +62,7 @@ public class CScrap {
                 "https://wallhaven.cc",
                 "q",
                 "/search",
-                new String[]{"figure.thumb a.preview", "a[href^='/w/']"} 
+                new String[]{"figure.thumb"} 
         ));
                
                 sitiosConfigurados.add(new ConfiguracionSitio(
@@ -92,12 +92,11 @@ public class CScrap {
         ));
 
                 sitiosConfigurados.add(new ConfiguracionSitio(
-        
-                "Peakpx",
-                "https://www.peakpx.com/",
-                "q",
-                "en/search",
-                new String[]{"figure a", "#search-list li a"} 
+                        "Peakpx",
+                        "https://www.peakpx.com/",
+                        "q",
+                        "en/search",
+                        new String[]{"figure a", "#search-list li a"} 
         ));
                
     }
@@ -164,10 +163,17 @@ public class CScrap {
     System.out.println("HTML recibido: " + elemento.outerHtml().substring(0, Math.min(200, elemento.outerHtml().length())));
         
         if (config.nombre.equals("Wallpaper Waves")) {
-        Element link = elemento.selectFirst("a");
-        datos.put("titulo", link.text());
-        datos.put("enlace", link.attr("href"));
-        datos.put("tipo", "WallpaperWaves");
+            Element titleElement = elemento.selectFirst("h3.jeg_post_title a");
+            String titulo = (titleElement != null) ? titleElement.text() : "Wallpaper Waves";
+            String enlace = (titleElement != null) ? titleElement.attr("href") : "";
+            
+            Element img = elemento.selectFirst(".jeg_thumb img");
+            String preview = (img != null) ? img.attr("src") : "";
+            
+            datos.put("titulo", titulo);
+            datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("tipo", "WallpaperWaves");
     }
         else if (config.nombre.equals("Motion Backgrounds")) {
 
@@ -191,25 +197,31 @@ public class CScrap {
 
         else if (config.nombre.equals("Wallhaven")){
             
-             String enlace = elemento.attr("href");
-    if (!enlace.startsWith("http")) {
-        enlace = "https://wallhaven.cc" + (enlace.startsWith("/") ? enlace : "/" + enlace);
-    }
-
-    String wallpaperId = "";
-    if (enlace.contains("/w/")) {
-        String[] partes = enlace.split("/");
-        for (String parte : partes) {
-            if (parte.length() == 6 && !parte.contains(".")) { 
-                wallpaperId = parte;
-                break;
-            }
-        }
-    }
-    
-    datos.put("titulo", "Wallhaven " + wallpaperId);
-    datos.put("enlace", enlace);
+            // Elemento ahora es <figure>, podemos acceder a sus hijos
+            Element linkElement = elemento.selectFirst("a.preview");
+            String enlace = (linkElement != null) ? linkElement.attr("href") : "";
             
+            if (!enlace.startsWith("http") && !enlace.isEmpty()) {
+                enlace = "https://wallhaven.cc" + (enlace.startsWith("/") ? enlace : "/" + enlace);
+            }
+
+            // Extraer ID directamente del atributo del figure
+            String wallpaperId = elemento.attr("data-wallpaper-id");
+            
+            // Extraer imagen (Wallhaven usa lazy loading con data-src)
+            Element img = elemento.selectFirst("img");
+            String preview = (img != null) ? img.attr("data-src") : "";
+            if (preview.isEmpty() && img != null) preview = img.attr("src");
+            
+            // Extraer resolución
+            Element resInfo = elemento.selectFirst(".wall-res");
+            String resolucion = (resInfo != null) ? resInfo.text() : "";
+            
+            datos.put("titulo", "Wallhaven " + wallpaperId);
+            datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("resolucion", resolucion);
+            datos.put("tipo", "Wallhaven");
         }
         
         else if (config.nombre.equals("Wallpaper Flare")){
