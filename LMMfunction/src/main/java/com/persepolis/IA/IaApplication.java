@@ -47,7 +47,9 @@ public class IaApplication {
 				}
 			}
 
-			if (frontendDir != null) {
+			// Solo intentar iniciar el frontend si estamos en Windows (Desarrollo local)
+			String os = System.getProperty("os.name").toLowerCase();
+			if (frontendDir != null && os.contains("win")) {
 				System.out.println("--- Frontend encontrado en: " + frontendDir.getCanonicalPath() + " ---");
 				// Usamos 'cmd /k' para mantener la ventana abierta y asegurar un entorno de shell correcto
 				// "\"WallPaperSystem\"" es el título de la ventana (requerido por start si hay comillas)
@@ -56,7 +58,7 @@ public class IaApplication {
 						.directory(frontendDir)
 						.start();
 			} else {
-				System.out.println("--- ADVERTENCIA: No se encontró 'package.json' en ninguna ruta esperada. ---");
+				System.out.println("--- INFO: Frontend no iniciado automáticamente (Entorno no Windows o carpeta no encontrada). ---");
 				System.out.println("--- Directorio actual de ejecución: " + new File(".").getCanonicalPath());
 			}
 		} catch (IOException e) {

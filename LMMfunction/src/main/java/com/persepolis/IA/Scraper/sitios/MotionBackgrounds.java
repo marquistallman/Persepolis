@@ -1,5 +1,6 @@
 package com.persepolis.IA.Scraper.sitios;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import org.jsoup.Jsoup;
@@ -12,8 +13,8 @@ public class MotionBackgrounds extends SitioBase {
     public String getNombre() { return "Motion Backgrounds"; }
 
     @Override
-    public String generarUrlBusqueda(String query) {
-        return "https://motionbgs.com/tag:" + query.toLowerCase().replace(" ", "-") + "/";
+    public String generarUrlBusqueda(String query) throws Exception {
+        return "https://motionbgs.com/?s=" + URLEncoder.encode(query, "UTF-8");
     }
 
     @Override
@@ -49,10 +50,7 @@ public class MotionBackgrounds extends SitioBase {
     public Map<String, String> obtenerDetalles(String url) {
         Map<String, String> detalles = new HashMap<>();
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0")
-                    .timeout(10000)
-                    .get();
+            Document doc = crearConexion(url).get();
 
             Element videoSource = doc.selectFirst("video source[type='video/mp4']");
             if (videoSource != null) {

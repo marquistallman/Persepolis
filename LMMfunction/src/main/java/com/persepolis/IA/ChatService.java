@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,11 +38,11 @@ public class ChatService {
     }
 
     // Almacenamiento temporal de sesiones (en memoria)
-    private final Map<String, UserSession> sessions = new HashMap<>();
+    // Usamos ConcurrentHashMap para seguridad en hilos con múltiples usuarios
+    private final Map<String, UserSession> sessions = new ConcurrentHashMap<>();
 
-    public Mono<Map<String, Object>> processMessage(String message) {
+    public Mono<Map<String, Object>> processMessage(String message, String userId) {
         if (message == null) return Mono.just(simpleResponse(""));
-        String userId = "default_user"; // Identificador temporal (en producción usarías un ID de sesión real)
         String lower = message.trim().toLowerCase(Locale.ROOT);
 
         // 1. Verificar si el usuario está en medio de un cuestionario activo

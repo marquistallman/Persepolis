@@ -1,4 +1,18 @@
-const API_BASE = 'http://localhost:8080/test';
+// Detectar entorno: Si es localhost y no es el puerto 8080, usar URL absoluta.
+// De lo contrario (Producción/Cloudflare), usar ruta relativa.
+const API_BASE = (window.location.hostname === 'localhost' && window.location.port !== '8080') 
+    ? 'http://localhost:8080/test' 
+    : '/test';
+
+// Generar o recuperar un ID de sesión único para este usuario
+function getSessionId() {
+    let sessionId = localStorage.getItem('chatSessionId');
+    if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem('chatSessionId', sessionId);
+    }
+    return sessionId;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatBtn = document.getElementById('chatBtn');
@@ -44,21 +58,33 @@ document.addEventListener('DOMContentLoaded', () => {
             appendMessage('user', message);
 
             try {
-                const response = await fetch(`${API_BASE}/chat?message=${encodeURIComponent(message)}`);
+                const response = await fetch(`${API_BASE}/chat?message=${encodeURIComponent(message)}`, {
+                    headers: {
+                        'X-Session-ID': getSessionId() // Enviamos el ID único
+                    }
+                });
+                
                 if (response.ok) {
-                    const data = await response.json();
-                    appendMessage('assistant', data.message);
+                    // Verificar que la respuesta sea JSON antes de parsear
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await response.json();
+                        appendMessage('assistant', data.message);
 
-                    if (data.results && data.results.length > 0) {
-                        sessionStorage.setItem('chatResults', JSON.stringify(data.results));
-                        if (!window.location.pathname.includes('browse.html')) {
-                            window.location.href = 'browse.html';
-                        } else {
-                            renderWallpapers(data.results);
+                        if (data.results && data.results.length > 0) {
+                            sessionStorage.setItem('chatResults', JSON.stringify(data.results));
+                            if (!window.location.pathname.includes('browse.html')) {
+                                window.location.href = 'browse.html';
+                            } else {
+                                renderWallpapers(data.results);
+                            }
                         }
+                    } else {
+                        console.error("Respuesta no válida (HTML recibido):", await response.text());
+                        appendMessage('assistant', 'Error: Invalid server response.');
                     }
                 } else {
-                    appendMessage('assistant', 'Error: Service unavailable.');
+                    appendMessage('assistant', `Error: Service unavailable (${response.status}).`);
                 }
             } catch (error) {
                 console.error('Chat Error:', error);
@@ -96,7 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadChatHistory() {
         try {
-            const response = await fetch(`${API_BASE}/chat/history`);
+            const response = await fetch(`${API_BASE}/chat/history`, {
+                headers: {
+                    'X-Session-ID': getSessionId()
+                }
+            });
             if (response.ok) {
                 const history = await response.json();
                 chatBody.innerHTML = ''; // Clear initial content
