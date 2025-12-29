@@ -39,8 +39,8 @@ public class ChatService {
     // Almacenamiento temporal de sesiones (en memoria)
     private final Map<String, UserSession> sessions = new HashMap<>();
 
-    public Mono<String> processMessage(String message) {
-        if (message == null) return Mono.just("");
+    public Mono<Map<String, Object>> processMessage(String message) {
+        if (message == null) return Mono.just(simpleResponse(""));
         String userId = "default_user"; // Identificador temporal (en producción usarías un ID de sesión real)
         String lower = message.trim().toLowerCase(Locale.ROOT);
 
@@ -51,7 +51,7 @@ public class ChatService {
         }
 
         if (isGreeting(lower)) {
-            return Mono.just(chatData.getResponse("greeting"));
+            return Mono.just(simpleResponse(chatData.getResponse("greeting")));
         }
 
         if (isStandardRequest(lower)) {
@@ -59,11 +59,11 @@ public class ChatService {
             session.currentNodeId = "root";
             session.isStandard = true;
             sessions.put(userId, session);
-            return Mono.just(chatData.getResponse("standardStart", chatData.getDecisionTree().getRoot().getText()));
+            return Mono.just(simpleResponse(chatData.getResponse("standardStart", chatData.getDecisionTree().getRoot().getText())));
         }
 
         if (isUnsure(lower)) {
-            return Mono.just(chatData.getResponse("unsure"));
+            return Mono.just(simpleResponse(chatData.getResponse("unsure")));
         }
 
         // 2. Caso: Usuario seguro con petición específica -> Iniciar flujo de 5 preguntas IA
@@ -84,7 +84,7 @@ public class ChatService {
         return chatData.getUnsureKeywords().stream().anyMatch(message::contains);
     }
 
-    private Mono<String> startSpecificFlow(String userId, String request) {
+    private Mono<Map<String, Object>> startSpecificFlow(String userId, String request) {
         // Enfoque determinista: Limpiamos la petición y usamos las preguntas estándar
         String keywords = extractKeywords(request);
         
@@ -94,10 +94,10 @@ public class ChatService {
         session.isStandard = true;
         sessions.put(userId, session);
 
-        return Mono.just(chatData.getResponse("specificStart", session.originalRequest, chatData.getDecisionTree().getRoot().getText()));
+        return Mono.just(simpleResponse(chatData.getResponse("specificStart", session.originalRequest, chatData.getDecisionTree().getRoot().getText())));
     }
 
-    private Mono<String> processActiveSession(String userId, String message) {
+    private Mono<Map<String, Object>> processActiveSession(String userId, String message) {
         UserSession session = sessions.get(userId);
 
         // 1. Verificar si estamos esperando confirmación de satisfacción
@@ -105,12 +105,16 @@ public class ChatService {
             String lower = message.trim().toLowerCase();
             if (lower.startsWith("si") || lower.startsWith("yes") || lower.startsWith("s") || lower.contains("ok")) {
                 sessions.remove(userId);
-                return Mono.just(chatData.getResponse("satisfactionYes"));
+                return Mono.just(simpleResponse(chatData.getResponse("satisfactionYes")));
             } else {
                 // Usuario NO satisfecho -> Usar LLM para generar nuevas keywords
                 return generateAlternativeKeywordsWithLLM(session).map(newQuery -> {
                     sessions.remove(userId);
-                    return chatData.getResponse("satisfactionRetry", searchAndFormat(newQuery, session.originalRequest));
+                    Map<String, Object> searchResult = performSearch(newQuery, session.originalRequest);
+                    String resultsText = (String) searchResult.get("message");
+                    Map<String, Object> response = new HashMap<>(searchResult);
+                    response.put("message", chatData.getResponse("satisfactionRetry", resultsText));
+                    return response;
                 });
             }
         }
@@ -148,7 +152,7 @@ public class ChatService {
                 nextNodeId = selectedOption.getNext();
                 
             } catch (Exception e) {
-                return Mono.just(chatData.getResponse("numberFormatError", currentNode.getText()));
+                return Mono.just(simpleResponse(chatData.getResponse("numberFormatError", currentNode.getText())));
             }
         }
 
@@ -156,7 +160,7 @@ public class ChatService {
         if (nextNodeId != null && !"END".equals(nextNodeId)) {
             session.currentNodeId = nextNodeId;
             ChatData.Node nextNode = chatData.getDecisionTree().getNodes().get(nextNodeId);
-            return Mono.just(chatData.getResponse("nextQuestion", nextNode.getText()));
+            return Mono.just(simpleResponse(chatData.getResponse("nextQuestion", nextNode.getText())));
         } else {
             // Flujo terminado
             String base = (session.originalRequest != null) ? session.originalRequest + " " : "";
@@ -165,8 +169,10 @@ public class ChatService {
             session.lastGeneratedQuery = finalResult;
             session.waitingForSatisfaction = true;
             
-            String results = searchAndFormat(finalResult, session.originalRequest);
-            return Mono.just(chatData.getResponse("satisfactionAsk", results));
+            Map<String, Object> searchResult = performSearch(finalResult, session.originalRequest);
+            String resultsText = (String) searchResult.get("message");
+            searchResult.put("message", chatData.getResponse("satisfactionAsk", resultsText));
+            return Mono.just(searchResult);
         }
     }
 
@@ -204,7 +210,8 @@ public class ChatService {
                 .collect(Collectors.joining(" "));
     }
 
-    private String searchAndFormat(String query, String originalRequest) {
+    private Map<String, Object> performSearch(String query, String originalRequest) {
+        Map<String, Object> response = new HashMap<>();
         try {
             CScrap scraper = new CScrap();
             String[] keywords = query.split("\\|\\|\\|");
@@ -227,20 +234,32 @@ public class ChatService {
             }
             
             if (resultCounts.isEmpty()) {
-                return chatData.getResponse("noResults", query);
+                return simpleResponse(chatData.getResponse("noResults", query));
             }
 
             List<Map.Entry<Map<String, String>, Integer>> sortedResults = new ArrayList<>(resultCounts.entrySet());
             sortedResults.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
             StringBuilder sb = new StringBuilder(chatData.getResponse("resultsHeader", originalRequest));
-            for (Map.Entry<Map<String, String>, Integer> entry : sortedResults) {
-                sb.append(entry.getKey().values()).append("\n");
-            }
-            return sb.toString();
+            
+            // Extraer la lista limpia de resultados para el frontend
+            List<Map<String, String>> finalResultsList = sortedResults.stream()
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+            response.put("message", sb.toString());
+            response.put("results", finalResultsList);
+            return response;
+
         } catch (Exception e) {
-            return chatData.getResponse("error", e.getMessage());
+            return simpleResponse(chatData.getResponse("error", e.getMessage()));
         }
+    }
+
+    private Map<String, Object> simpleResponse(String text) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", text);
+        return map;
     }
 
     private boolean isSupportContent(Map<String, String> result) {

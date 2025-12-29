@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -37,17 +38,18 @@ public class TestController {
     }
 
     @GetMapping("/test/chat")
-    public Mono<String> chat(@RequestParam String message) {
+    public Mono<Map<String, Object>> chat(@RequestParam String message) {
         // 1. Añadimos el mensaje del usuario al historial
         conversationHistory.add(new Message("user", message));
 
         // 2. Delegamos la lógica al ChatService (que maneja el flujo de preguntas)
         return chatService.processMessage(message)
-                .flatMap(aiResponse -> {
+                .flatMap(responseMap -> {
                     // 3. Añadimos la respuesta de la IA al historial
-                    conversationHistory.add(new Message("assistant", aiResponse));
+                    String textResponse = (String) responseMap.get("message");
+                    conversationHistory.add(new Message("assistant", textResponse));
                     // 4. Devolvemos la respuesta de la IA al cliente
-                    return Mono.just(aiResponse);
+                    return Mono.just(responseMap);
                 });
     }
 
