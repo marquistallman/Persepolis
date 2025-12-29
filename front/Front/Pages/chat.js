@@ -124,7 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 thumbnailUrl: item.preview || item.src || item.image || item.url || 'https://img.rocket.new/generatedImages/rocket_gen_img_104abccaa-1764813785194.png',
                 fullUrl: item.enlace || item.link || '#',
                 category: item.sitio || item.tipo || 'Web',
-                resolution: item.resolucion || item.info || ''
+                resolution: item.resolucion || item.info || '',
+                hasVideo: item.hasVideo === 'true'
             };
             
             if (!data.thumbnailUrl) return;
@@ -220,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Video preview logic
-        if (data.category === 'Wallpaper Waves') {
+        if (data.hasVideo) {
             fetchVideoPreview(data.fullUrl, data.category);
         }
     }
@@ -239,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     video.controls = true;
                     video.autoplay = true;
                     video.loop = true;
-                    video.muted = false;
+                    video.muted = true;
                     
                     img.classList.add('hidden');
                     img.parentElement.insertBefore(video, img);
