@@ -39,10 +39,7 @@ public class WallpaperWaves extends SitioBase {
     public Map<String, String> obtenerDetalles(String url) {
         Map<String, String> detalles = new HashMap<>();
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0")
-                    .timeout(10000)
-                    .get();
+            Document doc = crearConexion(url).get();
 
             Element videoSource = doc.selectFirst("div.player_responsive video source");
             if (videoSource != null) {
