@@ -1,7 +1,6 @@
 package com.persepolis.IA.controller;
 
 import com.persepolis.IA.Scraper.CScrap;
-import com.persepolis.IA.Scraper.SiteDetailScraper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,7 @@ public class ScraperController {
 
     @GetMapping(value = "/scraper/details", produces = "application/json")
     public Map<String, String> obtenerDetalles(@RequestParam String url, @RequestParam String site) {
-        SiteDetailScraper detailScraper = new SiteDetailScraper();
-        return detailScraper.obtenerDetalles(url, site);
+        CScrap scraper = new CScrap();
+        return scraper.obtenerDetalles(url, site);
     }
 }

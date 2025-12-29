@@ -85,7 +85,8 @@ const BrowseModule = {
                 thumbnailUrl: item.preview || 'https://img.rocket.new/generatedImages/rocket_gen_img_104abccaa-1764813785194.png',
                 fullUrl: item.enlace || '#',
                 category: item.sitio || item.tipo || 'Web',
-                resolution: item.resolucion || item.info || ''
+                resolution: item.resolucion || item.info || '',
+                hasVideo: item.hasVideo === 'true'
             }));
 
             this.render();
@@ -211,8 +212,8 @@ const BrowseModule = {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
 
-        // Si es Wallpaper Waves, buscar el video preview
-        if (data.category === 'Wallpaper Waves') {
+        // Si el sitio soporta video, buscar el video preview
+        if (data.hasVideo) {
             this.fetchVideoPreview(data.fullUrl, data.category);
         }
     },
