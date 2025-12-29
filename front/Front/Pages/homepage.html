@@ -9,6 +9,63 @@
 
 <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fwallpaperh3057back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
 <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+<style>
+    /* Chat Window Styles */
+    .chat-window {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        height: 400px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 100;
+        flex-direction: column;
+        overflow: hidden;
+        color: #333;
+    }
+
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .close-chat {
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+    .chat-body {
+        flex: 1;
+        padding: 15px;
+        background: #f5f7fa;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .chat-footer {
+        padding: 15px;
+        background: white;
+        border-top: 1px solid #eee;
+    }
+
+    .chat-footer input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        box-sizing: border-box;
+        outline: none;
+    }
+</style>
 </head>
 <body class="bg-background">
 <!-- Navigation Header -->
@@ -24,6 +81,7 @@
             <div class="hidden md:flex items-center gap-8">
                 <a href="homepage.html" class="text-primary font-medium hover:text-accent transition-colors">Home</a>
                 <a href="browse.html" class="text-text-secondary hover:text-accent transition-colors">Browse</a>
+                <button id="chatBtn" class="text-text-secondary hover:text-accent transition-colors">Chat</button>
             </div>
 
             <!-- Search & Actions -->
@@ -221,6 +279,19 @@
     </div>
 </footer>
 
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header">
+            <span>Chat Support</span>
+            <span class="close-chat" id="closeChat">&times;</span>
+        </div>
+        <div class="chat-body">
+            <p>Hello! How can we help you today?</p>
+        </div>
+        <div class="chat-footer">
+            <input type="text" placeholder="Type a message...">
+        </div>
+    </div>
+
     <script>
         // Simple carousel rotation for hero section
         const heroImages = [
@@ -271,7 +342,9 @@
         document.querySelectorAll('.card, .badge').forEach(el => {
             observer.observe(el);
         });
+
     </script>
+    <script src="chat.js"></script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>
