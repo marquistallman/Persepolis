@@ -34,7 +34,7 @@ public class CScrap {
                 "https://wallpaperwaves.com/",
                 "s",
                 "/",
-                new String[]{"h3.jeg_post_title a", "a[href*='wallpaper']"} 
+                new String[]{"article.jeg_post"} 
         ));
         
                 sitiosConfigurados.add(new ConfiguracionSitio(
@@ -62,7 +62,7 @@ public class CScrap {
                 "https://wallhaven.cc",
                 "q",
                 "/search",
-                new String[]{"figure.thumb a.preview", "a[href^='/w/']"} 
+                new String[]{"figure.thumb"} 
         ));
                
                 sitiosConfigurados.add(new ConfiguracionSitio(
@@ -79,7 +79,7 @@ public class CScrap {
                 "https://artvee.com/",
                 "s",
                 "/main/",
-                new String[]{"h3.product-title a", "a[href*='/dl/']"} 
+                new String[]{"div.product-grid-item"} 
         ));
                 
                 sitiosConfigurados.add(new ConfiguracionSitio(
@@ -92,12 +92,11 @@ public class CScrap {
         ));
 
                 sitiosConfigurados.add(new ConfiguracionSitio(
-        
-                "Peakpx",
-                "https://www.peakpx.com/",
-                "q",
-                "en/search",
-                new String[]{"figure a", "#search-list li a"} 
+                        "Peakpx",
+                        "https://www.peakpx.com/",
+                        "q",
+                        "en/search",
+                        new String[]{"#search-list li"} 
         ));
                
     }
@@ -164,52 +163,75 @@ public class CScrap {
     System.out.println("HTML recibido: " + elemento.outerHtml().substring(0, Math.min(200, elemento.outerHtml().length())));
         
         if (config.nombre.equals("Wallpaper Waves")) {
-        Element link = elemento.selectFirst("a");
-        datos.put("titulo", link.text());
-        datos.put("enlace", link.attr("href"));
-        datos.put("tipo", "WallpaperWaves");
+            Element titleElement = elemento.selectFirst("h3.jeg_post_title a");
+            String titulo = (titleElement != null) ? titleElement.text() : "Wallpaper Waves";
+            String enlace = (titleElement != null) ? titleElement.attr("href") : "";
+            
+            Element img = elemento.selectFirst(".jeg_thumb img");
+            String preview = (img != null) ? img.attr("src") : "";
+            
+            datos.put("titulo", titulo);
+            datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("tipo", "WallpaperWaves");
     }
         else if (config.nombre.equals("Motion Backgrounds")) {
 
-         String titulo = elemento.attr("title");
-    if (titulo.contains(" live wallpaper download")) {
-        titulo = titulo.replace(" live wallpaper download", "");
-    }
-    
-    if (titulo.isEmpty()) {
-        titulo = elemento.text();
-    }
-    
-    String enlace = elemento.attr("href");
-    if (!enlace.startsWith("http")) {
-        enlace = "https://motionbgs.com" + enlace;
-    }
-    
-    datos.put("titulo", titulo.trim());
-    datos.put("enlace", enlace);
-    }
+            Element ttlSpan = elemento.selectFirst("span.ttl");
+            String titulo = (ttlSpan != null) ? ttlSpan.text() : elemento.attr("title");
+            
+            if (titulo.contains(" live wallpaper download")) {
+                titulo = titulo.replace(" live wallpaper download", "");
+            }
+            
+            String enlace = elemento.attr("href");
+            if (!enlace.startsWith("http")) {
+                enlace = "https://motionbgs.com" + enlace;
+            }
+            
+            Element img = elemento.selectFirst("img");
+            String preview = (img != null) ? img.attr("src") : "";
+            if (!preview.startsWith("http") && !preview.isEmpty()) {
+                preview = "https://motionbgs.com" + preview;
+            }
+            
+            Element frmSpan = elemento.selectFirst("span.frm");
+            String resolucion = (frmSpan != null) ? frmSpan.text() : "";
+            
+            datos.put("titulo", titulo.trim());
+            datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("resolucion", resolucion);
+            datos.put("tipo", "Motion Backgrounds");
+        }
 
         else if (config.nombre.equals("Wallhaven")){
             
-             String enlace = elemento.attr("href");
-    if (!enlace.startsWith("http")) {
-        enlace = "https://wallhaven.cc" + (enlace.startsWith("/") ? enlace : "/" + enlace);
-    }
-
-    String wallpaperId = "";
-    if (enlace.contains("/w/")) {
-        String[] partes = enlace.split("/");
-        for (String parte : partes) {
-            if (parte.length() == 6 && !parte.contains(".")) { 
-                wallpaperId = parte;
-                break;
-            }
-        }
-    }
-    
-    datos.put("titulo", "Wallhaven " + wallpaperId);
-    datos.put("enlace", enlace);
+            // Elemento ahora es <figure>, podemos acceder a sus hijos
+            Element linkElement = elemento.selectFirst("a.preview");
+            String enlace = (linkElement != null) ? linkElement.attr("href") : "";
             
+            if (!enlace.startsWith("http") && !enlace.isEmpty()) {
+                enlace = "https://wallhaven.cc" + (enlace.startsWith("/") ? enlace : "/" + enlace);
+            }
+
+            // Extraer ID directamente del atributo del figure
+            String wallpaperId = elemento.attr("data-wallpaper-id");
+            
+            // Extraer imagen (Wallhaven usa lazy loading con data-src)
+            Element img = elemento.selectFirst("img");
+            String preview = (img != null) ? img.attr("data-src") : "";
+            if (preview.isEmpty() && img != null) preview = img.attr("src");
+            
+            // Extraer resolución
+            Element resInfo = elemento.selectFirst(".wall-res");
+            String resolucion = (resInfo != null) ? resInfo.text() : "";
+            
+            datos.put("titulo", "Wallhaven " + wallpaperId);
+            datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("resolucion", resolucion);
+            datos.put("tipo", "Wallhaven");
         }
         
         else if (config.nombre.equals("Wallpaper Flare")){
@@ -248,54 +270,28 @@ public class CScrap {
         }
         
         else if (config.nombre.equals("Artvee")){
-            Element titleElement = elemento.selectFirst("h3.product-title");
-    String titulo = "";
-    String enlace = "";
-    
-    if (titleElement != null) {
-        Element link = titleElement.selectFirst("a");
-        if (link != null) {
-            titulo = link.text().trim();
-            enlace = link.attr("href");
-        }
-    }
-   
-    if (titulo.isEmpty()) {
-        Element anyLink = elemento.selectFirst("a");
-        if (anyLink != null) {
-            titulo = anyLink.text().trim();
-            enlace = anyLink.attr("href");
-        }
-    }
-
-    String info = "";
-    
-    Elements spans = elemento.select("span");
-    for (Element span : spans) {
-        String text = span.text();
-        if (text.matches(".*\\d+\\s*x\\s*\\d+.*")) {
-            info = text;
-            break;
-        }
-    }
-    
-    if (info.isEmpty()) {
-        String allText = elemento.text();
-        java.util.regex.Matcher matcher = 
-            java.util.regex.Pattern.compile("\\d+\\s*x\\s*\\d+\\s*px").matcher(allText);
-        if (matcher.find()) {
-            info = matcher.group();
-        }
-    }
-    
-    if (titulo.length() > 60) {
-        titulo = titulo.substring(0, 57) + "...";
-    }
-    
-    datos.put("titulo", titulo.isEmpty() ? "Artvee Artwork" : titulo);
-    datos.put("enlace", enlace);
-    datos.put("info", info);
-    datos.put("tipo", "Artvee - Fine Art");
+            Element titleElement = elemento.selectFirst("h3.product-title a");
+            String titulo = (titleElement != null) ? titleElement.text().trim() : "Artvee Artwork";
+            String enlace = (titleElement != null) ? titleElement.attr("href") : "";
+            
+            Element img = elemento.selectFirst(".product-element-top img");
+            String preview = (img != null) ? img.attr("src") : "";
+            
+            String resolucion = "";
+            Element dataDiv = elemento.selectFirst(".product-element-top");
+            if (dataDiv != null && dataDiv.hasAttr("data-sk")) {
+                String json = dataDiv.attr("data-sk");
+                java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"hdlimagesize\":\"([^\"]+)\"").matcher(json);
+                if (m.find()) {
+                    resolucion = m.group(1);
+                }
+            }
+            
+            datos.put("titulo", titulo);
+            datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("resolucion", resolucion);
+            datos.put("tipo", "Artvee");
         }
         
         else if (config.nombre.equals("Moe Walls")){
@@ -327,15 +323,27 @@ public class CScrap {
         }
         
         else if (config.nombre.equals("Peakpx")) {
-            String enlace = elemento.attr("href");
-            if (!enlace.startsWith("http")) {
+            Element link = elemento.selectFirst("a[itemprop='url']");
+            String enlace = (link != null) ? link.attr("href") : "";
+            
+            if (!enlace.startsWith("http") && !enlace.isEmpty()) {
                 enlace = "https://www.peakpx.com" + enlace;
             }
+            
             Element img = elemento.selectFirst("img");
-            String titulo = (img != null) ? img.attr("alt") : "Peakpx Wallpaper";
+            String preview = (img != null) ? img.attr("data-src") : "";
+            if (preview.isEmpty() && img != null) preview = img.attr("src");
+            
+            Element caption = elemento.selectFirst("figcaption");
+            String titulo = (caption != null) ? caption.text() : "Peakpx Wallpaper";
+            
+            Element resSpan = elemento.selectFirst("span.res");
+            String resolucion = (resSpan != null) ? resSpan.text() : "";
             
             datos.put("titulo", titulo);
             datos.put("enlace", enlace);
+            datos.put("preview", preview);
+            datos.put("resolucion", resolucion);
             datos.put("tipo", "Peakpx");
         }
         
