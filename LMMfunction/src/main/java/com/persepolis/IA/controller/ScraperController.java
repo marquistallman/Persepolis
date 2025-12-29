@@ -1,6 +1,7 @@
 package com.persepolis.IA.controller;
 
 import com.persepolis.IA.Scraper.CScrap;
+import com.persepolis.IA.Scraper.SiteDetailScraper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,5 +20,11 @@ public class ScraperController {
         
         // Llamamos al nuevo método que devuelve datos puros
         return scraper.buscarWeb(query);
+    }
+
+    @GetMapping(value = "/scraper/details", produces = "application/json")
+    public Map<String, String> obtenerDetalles(@RequestParam String url, @RequestParam String site) {
+        SiteDetailScraper detailScraper = new SiteDetailScraper();
+        return detailScraper.obtenerDetalles(url, site);
     }
 }

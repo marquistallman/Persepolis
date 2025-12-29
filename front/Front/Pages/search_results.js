@@ -149,7 +149,9 @@ const SearchModule = {
                         </button>
                     </div>
                     <div>
-                        <h3 class="text-white font-semibold text-lg mb-2">${data.title}</h3>
+                        <h3 class="text-white font-semibold text-lg mb-2">
+                            <a href="${data.fullUrl}" target="_blank" class="hover:text-accent transition-colors">${data.title}</a>
+                        </h3>
                         <div class="flex items-center justify-between text-white/80 text-sm">
                             <span>${data.resolution}</span>
                         </div>
@@ -192,7 +194,16 @@ const SearchModule = {
         // Logic to populate and show modal
         const modal = this.dom.previewModal;
         document.getElementById('previewImage').src = data.fullUrl || data.thumbnailUrl;
-        document.getElementById('previewTitle').textContent = data.title;
+        
+        const titleEl = document.getElementById('previewTitle');
+        titleEl.innerHTML = `<a href="${data.fullUrl}" target="_blank" class="hover:text-accent transition-colors">${data.title}</a>`;
+        
+        // Configurar el botón de descarga si existe en este modal
+        const downloadBtn = modal.querySelector('.btn-accent');
+        if (downloadBtn) {
+            downloadBtn.onclick = () => window.open(data.fullUrl, '_blank');
+        }
+        
         // ... populate other fields
         modal.classList.remove('hidden');
         modal.classList.add('flex');

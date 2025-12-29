@@ -118,7 +118,9 @@ const BrowseModule = {
                         </button>
                     </div>
                     <div>
-                        <h3 class="text-white font-semibold text-lg mb-2">${data.title}</h3>
+                        <h3 class="text-white font-semibold text-lg mb-2">
+                            <a href="${data.fullUrl}" target="_blank" class="hover:text-accent transition-colors">${data.title}</a>
+                        </h3>
                         <div class="flex items-center justify-between text-white/80 text-sm">
                             <div class="flex items-center gap-3">
                                 <span class="flex items-center gap-1">
@@ -187,17 +189,69 @@ const BrowseModule = {
 
     openPreview(data) {
         const modal = this.dom.previewModal;
-        document.getElementById('previewImage').src = data.fullUrl || data.thumbnailUrl;
-        document.getElementById('previewTitle').textContent = data.title;
+        const img = document.getElementById('previewImage');
+        
+        // Resetear estado del modal (quitar video anterior si existe)
+        const existingVideo = modal.querySelector('video');
+        if (existingVideo) existingVideo.remove();
+        img.classList.remove('hidden');
+        img.src = data.fullUrl || data.thumbnailUrl;
+        
+        const titleEl = document.getElementById('previewTitle');
+        titleEl.innerHTML = `<a href="${data.fullUrl}" target="_blank" class="hover:text-accent transition-colors">${data.title}</a>`;
+        
         document.getElementById('previewCreator').textContent = data.category;
+        
+        // Configurar el botón de descarga para abrir el enlace original
+        const downloadBtn = modal.querySelector('.btn-accent');
+        if (downloadBtn) {
+            downloadBtn.onclick = () => window.open(data.fullUrl, '_blank');
+        }
         
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+
+        // Si es Wallpaper Waves, buscar el video preview
+        if (data.category === 'Wallpaper Waves') {
+            this.fetchVideoPreview(data.fullUrl, data.category);
+        }
+    },
+
+    async fetchVideoPreview(url, site) {
+        try {
+            // Llamada al nuevo endpoint que usa SiteDetailScraper
+            const response = await fetch(`/scraper/details?url=${encodeURIComponent(url)}&site=${encodeURIComponent(site)}`);
+            if (response.ok) {
+                const details = await response.json();
+                if (details.videoUrl) {
+                    const img = document.getElementById('previewImage');
+                    const video = document.createElement('video');
+                    
+                    video.src = details.videoUrl;
+                    video.className = "w-full h-auto rounded-t-xl";
+                    video.controls = true;
+                    video.autoplay = true;
+                    video.loop = true;
+                    video.muted = false; // Opcional: iniciar con sonido
+                    
+                    img.classList.add('hidden');
+                    img.parentElement.insertBefore(video, img);
+                }
+            }
+        } catch (e) {
+            console.error("Error cargando preview de video:", e);
+        }
     },
 
     closeModal() {
-        this.dom.previewModal.classList.add('hidden');
-        this.dom.previewModal.classList.remove('flex');
+        // Limpiar video al cerrar para detener el audio
+        const modal = this.dom.previewModal;
+        const video = modal.querySelector('video');
+        if (video) video.remove();
+        document.getElementById('previewImage').classList.remove('hidden');
+        
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     },
 
     handleSearchInput(e) {
