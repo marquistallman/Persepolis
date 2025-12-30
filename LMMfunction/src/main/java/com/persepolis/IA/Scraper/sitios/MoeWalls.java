@@ -42,28 +42,30 @@ public class MoeWalls extends SitioBase {
 
     @Override
     public Map<String, String> obtenerDetalles(String url) {
-        Map<String, String> previews = new HashMap<>();
+        Map<String, String> detalles = new HashMap<>();
         try {
             Document doc = Jsoup.connect(url)
                     .userAgent("Mozilla/5.0")
                     .timeout(10000)
                     .get();
 
-            doc.select("img.attachment-bimber-grid-standard, .gi-frame img, .entry-featured-media img")
-               .forEach(img -> {
-                   String key = img.attr("alt");
-                   if (key.isEmpty()) key = "preview_" + img.attr("src").hashCode();
-                   
-                   previews.put(key, img.attr("src"));
-                   
-                   if (img.hasAttr("srcset")) {
-                       previews.put(key + "_srcset", img.attr("srcset"));
-                   }
-               });
-            
+            // Buscamos el video y usamos abs:src para obtener la URL completa (incluyendo dominio)
+            Element video = doc.selectFirst("video");
+            if (video != null) {
+                String src = video.attr("abs:src");
+                if (src.isEmpty()) {
+                    Element source = video.selectFirst("source");
+                    if (source != null) src = source.attr("abs:src");
+                }
+                
+                if (!src.isEmpty()) {
+                    detalles.put("videoUrl", src);
+                    detalles.put("tipoContenido", "video");
+                }
+            }
         } catch (Exception e) {
-            System.err.println("Error obteniendo previews de Moewalls: " + e.getMessage());
+            System.err.println("Error obteniendo detalles de Moewalls: " + e.getMessage());
         }
-        return previews;
+        return detalles;
     }
 }

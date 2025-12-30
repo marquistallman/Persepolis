@@ -2,7 +2,7 @@ package com.persepolis.IA.controller;
 
 import com.persepolis.IA.ChatService;
 import com.persepolis.IA.dto.Message;
-import com.persepolis.IA.services.AiClient;
+import com.persepolis.IA.services.OpenRouterService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,20 +19,20 @@ import reactor.core.publisher.Mono;
 @CrossOrigin(origins = "*")
 public class TestController {
 
-    private final AiClient ai;
+    private final OpenRouterService openRouterService;
     private final ChatService chatService;
 
     // Mapa para guardar el historial separado por ID de sesión del usuario
     private final Map<String, List<Message>> userHistories = new ConcurrentHashMap<>();
 
-    public TestController(AiClient ai, ChatService chatService) {
-        this.ai = ai;
+    public TestController(OpenRouterService openRouterService, ChatService chatService) {
+        this.openRouterService = openRouterService;
         this.chatService = chatService;
     }
 
-    @GetMapping("/test/ollama")
-    public Mono<String> testOllama() {
-        return ai.generate("Dime si estás vivo", true);
+    @GetMapping("/test/openrouter")
+    public String testOpenRouter() {
+        return openRouterService.generateResponse("Dime si estás vivo. Soy OpenRouter.");
     }
 
     // Helper para obtener o crear el historial de un usuario específico

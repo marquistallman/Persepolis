@@ -109,7 +109,9 @@ public class CScrap {
         for (SitioBase sitio : sitios) {
             try {
                 String url = sitio.generarUrlBusqueda(busqueda);
-                Document doc = Jsoup.connect(url)
+                System.out.println("--- Scraping site: " + sitio.getNombre() + " -> " + url);
+
+                org.jsoup.Connection connection = Jsoup.connect(url)
                         .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                         .referrer("https://www.google.com/")
                         .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
@@ -121,19 +123,40 @@ public class CScrap {
                         .header("Sec-Fetch-Mode", "navigate")
                         .header("Sec-Fetch-Site", "cross-site")
                         .header("Upgrade-Insecure-Requests", "1")
-                        .timeout(15000)
+                        .timeout(20000)
                         .ignoreHttpErrors(true)
-                        .get();
+                        .followRedirects(true);
+
+                org.jsoup.Connection.Response response = connection.execute();
+                System.out.println("  HTTP status for " + sitio.getNombre() + ": " + response.statusCode());
+
+                if (response.statusCode() >= 400) {
+                    System.out.println("  Skipping " + sitio.getNombre() + " due to HTTP error: " + response.statusCode());
+                    continue;
+                }
+
+                Document doc = response.parse();
+                if (doc == null) {
+                    System.out.println("  Document parsing returned null for " + sitio.getNombre());
+                    continue;
+                }
 
                 Elements elementos = sitio.obtenerElementosRelevantes(doc);
+                System.out.println("  Found " + elementos.size() + " elements on " + sitio.getNombre());
 
                 for (Element elemento : elementos) {
-                    Map<String, String> datos = sitio.extraerDatos(elemento);
-                    datos.put("sitio", sitio.getNombre()); // Agregamos el origen
-                    resultados.add(datos);
+                    try {
+                        Map<String, String> datos = sitio.extraerDatos(elemento);
+                        datos.put("sitio", sitio.getNombre()); // Agregamos el origen
+                        resultados.add(datos);
+                    } catch (Exception ex) {
+                        System.out.println("  Error extracting data from element on " + sitio.getNombre() + ": " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
                 }
             } catch (Exception e) {
                 System.out.println("Error scraping web " + sitio.getNombre() + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
         return resultados;

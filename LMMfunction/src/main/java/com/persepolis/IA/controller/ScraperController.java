@@ -1,10 +1,11 @@
 package com.persepolis.IA.controller;
 
-import com.persepolis.IA.Scraper.CScrap;
+import com.persepolis.IA.services.ScraperService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
 import java.util.List;
 import java.util.Map;
 
@@ -12,18 +13,28 @@ import java.util.Map;
 @CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen (necesario para conectar con el Front)
 public class ScraperController {
 
+    private final ScraperService scraperService;
+
+    public ScraperController(ScraperService scraperService) {
+        this.scraperService = scraperService;
+    }
+
     @GetMapping(value = "/scraper", produces = "application/json")
     public List<Map<String, String>> buscar(@RequestParam(name = "q", defaultValue = "anime") String query) {
-        // Instanciamos el scraper
-        CScrap scraper = new CScrap();
-        
-        // Llamamos al nuevo método que devuelve datos puros
-        return scraper.buscarWeb(query);
+        return scraperService.searchWallpapers(query);
     }
 
     @GetMapping(value = "/scraper/details", produces = "application/json")
     public Map<String, String> obtenerDetalles(@RequestParam String url, @RequestParam String site) {
-        CScrap scraper = new CScrap();
-        return scraper.obtenerDetalles(url, site);
+        return scraperService.getWallpaperDetails(url, site);
+    }
+
+    // Endpoint de depuración: muestra conteos y primeras filas de tablas relevantes
+    @org.springframework.web.bind.annotation.GetMapping(value = "/debug/db", produces = "application/json")
+    public java.util.Map<String, Object> debugDb() {
+        java.util.Map<String, Object> resp = new java.util.HashMap<>();
+        resp.put("web_cache_count", scraperService.countCacheEntries());
+        resp.put("web_cache_samples", scraperService.getCacheSample(10));
+        return resp;
     }
 }
