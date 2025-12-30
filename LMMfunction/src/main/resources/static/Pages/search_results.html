@@ -3,90 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Browse thousands of curated wallpapers across categories including Nature, Abstract, Minimalist, Photography, Digital Art, and Seasonal. Advanced filtering and color-based search.">
-    <title>PersepolisAI</title>
+    <meta name="description" content="AI-powered search results for Persepolis IA wallpapers. Discover filtered wallpapers with category tags, download counts, and advanced sorting options.">
+    <title>Search Results - Persepolis IA</title>
     <link rel="stylesheet" href="../css/main.css">
 
 <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fwallpaperh3057back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
 <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
-<style>
-    /* Chat Window Styles */
-    .chat-window {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 300px;
-        height: 400px;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        z-index: 100;
-        flex-direction: column;
-        overflow: hidden;
-        color: #333;
-    }
-
-    .chat-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
-    }
-
-    .close-chat {
-        cursor: pointer;
-        font-size: 1.2rem;
-    }
-
-    .chat-body {
-        flex: 1;
-        padding: 15px;
-        background: #f5f7fa;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-    }
-
-    .chat-footer {
-        padding: 15px;
-        background: white;
-        border-top: 1px solid #eee;
-    }
-
-    .chat-footer input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        box-sizing: border-box;
-        outline: none;
-    }
-</style>
 </head>
 <body class="bg-background">
     <!-- Navigation Header -->
     <header class="sticky top-0 z-50 bg-background-light/95 backdrop-blur-sm border-b border-border shadow-subtle">
         <nav class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
-                    <span class="font-headline text-2xl font-bold text-primary">PersepolisAI</span>
+                <!-- Brand Name -->
+                <a href="homepage.html" class="group">
+                    <span class="font-headline text-2xl font-bold text-primary group-hover:text-accent transition-colors">Persepolis IA</span>
                 </a>
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center gap-8">
                     <a href="homepage.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
-                    <a href="browse.html" class="text-primary font-medium hover:text-accent transition-colors">Browse</a>
-                    <button id="chatBtn" class="text-text-secondary hover:text-accent transition-colors">Chat</button>
+                    <a href="browse.html" class="text-text-secondary hover:text-accent transition-colors">Browse</a>
                 </div>
 
                 <!-- Search & Actions -->
                 <div class="flex items-center gap-4">
-                    <button class="p-2 hover:bg-surface rounded-lg transition-colors focus-ring" aria-label="Favorites">
+                    <button class="hidden md:flex items-center gap-2 px-4 py-2 bg-surface rounded-lg hover:bg-surface-dark transition-colors focus-ring" aria-label="Search wallpapers">
+                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_194eeb027-1764656322629.png" alt="Search icon" class="w-5 h-5">
+                        <span class="text-text-secondary text-sm">Search...</span>
                     </button>
-                    <button id="mobileMenuBtn" class="md:hidden p-2 hover:bg-surface rounded-lg transition-colors" aria-label="Menu">
+                    <button class="p-2 hover:bg-surface rounded-lg transition-colors focus-ring" aria-label="Favorites">
+                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_16cc80808-1766786756456.png" alt="Favorites icon" class="w-6 h-6">
+                    </button>
+                    <button class="md:hidden p-2 hover:bg-surface rounded-lg transition-colors" aria-label="Menu">
                         <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1b5957374-1766482728093.png" alt="Menu icon" class="w-6 h-6">
                     </button>
                 </div>
@@ -100,35 +49,54 @@
             <nav class="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
                 <a href="homepage.html" class="text-text-secondary hover:text-primary transition-colors">Home</a>
                 <img src="https://img.rocket.new/generatedImages/rocket_gen_img_17e2a58be-1765643541919.png" alt="Breadcrumb separator" class="w-4 h-4">
-                <span class="text-primary font-medium">Browse</span>
+                <span class="text-primary font-medium">Search Results</span>
             </nav>
         </div>
     </section>
 
-    <!-- Main Browse Section -->
+    <!-- Search Context Banner -->
+    <section class="bg-gradient-to-r from-accent/10 to-primary/10 border-b border-border">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="font-headline text-3xl md:text-4xl mb-2">Search Results</h1>
+                    <p class="text-text-secondary">
+                        Showing results for: <span id="searchQuery" class="font-semibold text-primary">"nature wallpapers"</span>
+                    </p>
+                </div>
+                <button id="modifySearchBtn" class="btn-outline flex items-center gap-2">
+                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_194eeb027-1764656322629.png" alt="Search icon" class="w-5 h-5">
+                    Modify Search
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Search Results Section -->
     <section class="py-8">
         <div class="container mx-auto px-4">
             <div class="flex flex-col lg:flex-row gap-8">
                 <!-- Filter Sidebar -->
                 <aside class="lg:w-80 flex-shrink-0">
                     <div class="sticky top-24 space-y-6">
-                        <!-- Search Bar -->
+                        <!-- Search Refinement Bar -->
                         <div class="card p-4">
+                            <h3 class="font-semibold text-lg mb-4">Refine Your Search</h3>
                             <div class="relative">
                                 <img src="https://img.rocket.new/generatedImages/rocket_gen_img_194eeb027-1764656322629.png" alt="Search icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5">
                                 <input 
                                     type="text" 
-                                    id="searchInput"
-                                    placeholder="Search wallpapers..." 
+                                    id="refineSearchInput"
+                                    placeholder="Add more keywords..." 
                                     class="w-full pl-10 pr-4 py-3 border border-border rounded-lg focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                                    aria-label="Search wallpapers">
+                                    aria-label="Refine search">
                             </div>
-                            <div id="searchSuggestions" class="mt-2 hidden">
+                            <div id="searchAutoComplete" class="mt-2 hidden">
                                 <div class="text-xs text-text-secondary mb-2">Suggestions:</div>
                                 <div class="flex flex-wrap gap-2">
-                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-surface-dark transition-colors">Mountain</button>
-                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-surface-dark transition-colors">Ocean</button>
-                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-surface-dark transition-colors">Abstract</button>
+                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-accent hover:text-white transition-colors">4K resolution</button>
+                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-accent hover:text-white transition-colors">landscape</button>
+                                    <button class="px-3 py-1 bg-surface text-text-secondary text-sm rounded-full hover:bg-accent hover:text-white transition-colors">mountains</button>
                                 </div>
                             </div>
                         </div>
@@ -143,6 +111,15 @@
                                 </button>
                             </div>
 
+                            <!-- AI Relevance Score -->
+                            <div class="mb-6 p-3 bg-accent/10 rounded-lg border border-accent/20">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-5 h-5">
+                                    <span class="text-sm font-medium text-accent">AI-Powered Results</span>
+                                </div>
+                                <p class="text-xs text-text-secondary">Results are sorted by relevance using our AI algorithm</p>
+                            </div>
+
                             <!-- Categories -->
                             <div class="mb-6">
                                 <h4 class="font-medium text-sm text-text-secondary mb-3">Categories</h4>
@@ -150,37 +127,32 @@
                                     <label class="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent" checked>
                                         <span class="text-sm group-hover:text-primary transition-colors">All Categories</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">12,450</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">3,240</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
+                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent" checked>
                                         <span class="text-sm group-hover:text-primary transition-colors">Nature</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">2,450</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">1,850</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
                                         <span class="text-sm group-hover:text-primary transition-colors">Abstract</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">1,890</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">620</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
                                         <span class="text-sm group-hover:text-primary transition-colors">Minimalist</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">1,650</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">380</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
                                         <span class="text-sm group-hover:text-primary transition-colors">Photography</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">3,120</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">290</span>
                                     </label>
                                     <label class="flex items-center gap-3 cursor-pointer group">
                                         <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
                                         <span class="text-sm group-hover:text-primary transition-colors">Digital Art</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">2,780</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
-                                        <span class="text-sm group-hover:text-primary transition-colors">Seasonal</span>
-                                        <span class="ml-auto text-xs text-text-tertiary">980</span>
+                                        <span class="ml-auto text-xs text-text-tertiary">100</span>
                                     </label>
                                 </div>
                             </div>
@@ -218,6 +190,10 @@
                                         <input type="radio" name="resolution" class="w-4 h-4 text-accent border-border focus:ring-accent">
                                         <span class="text-sm group-hover:text-primary transition-colors">Full HD (1920x1080)</span>
                                     </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" name="resolution" class="w-4 h-4 text-accent border-border focus:ring-accent">
+                                        <span class="text-sm group-hover:text-primary transition-colors">Mobile (1080x1920)</span>
+                                    </label>
                                 </div>
                             </div>
 
@@ -237,15 +213,16 @@
                                 </div>
                             </div>
 
-                            <!-- Creator Type -->
+                            <!-- Mood/Style Tags -->
                             <div>
-                                <h4 class="font-medium text-sm text-text-secondary mb-3">Creator Type</h4>
-                                <div class="space-y-2">
-                                    <label class="flex items-center gap-3 cursor-pointer group">
-                                        <input type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent">
-                                        <span class="text-sm group-hover:text-primary transition-colors">Verified Creators</span>
-                                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1b7a6860e-1765745957340.png" alt="Verified badge" class="w-4 h-4 ml-auto">
-                                    </label>
+                                <h4 class="font-medium text-sm text-text-secondary mb-3">Mood & Style</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Peaceful</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Vibrant</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Dark</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Light</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Dramatic</button>
+                                    <button class="px-3 py-1.5 border border-border text-text-secondary text-sm rounded-full hover:border-accent hover:bg-accent hover:text-white transition-colors">Calm</button>
                                 </div>
                             </div>
                         </div>
@@ -260,7 +237,7 @@
                             <!-- Results Count & Bulk Actions -->
                             <div class="flex items-center gap-4">
                                 <p class="text-text-secondary">
-                                    <span class="font-semibold text-primary" id="resultsCount">12,450</span> wallpapers found
+                                    <span class="font-semibold text-primary" id="resultsCount">0</span> results found
                                 </p>
                                 <button id="bulkSelectBtn" class="text-sm text-accent hover:text-accent-600 transition-colors flex items-center gap-1">
                                     <img src="https://img.rocket.new/generatedImages/rocket_gen_img_177fb76fc-1764634750407.png" alt="Bulk select icon" class="w-4 h-4">
@@ -285,16 +262,24 @@
 
                                 <!-- Sort Dropdown -->
                                 <div class="relative">
-                                    <select class="px-4 py-2 border border-border rounded-lg bg-background-light focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 cursor-pointer" aria-label="Sort wallpapers">
-                                        <option value="newest">Newest First</option>
+                                    <select id="sortSelect" class="px-4 py-2 border border-border rounded-lg bg-background-light focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 cursor-pointer" aria-label="Sort wallpapers">
+                                        <option value="relevance">Best Match</option>
                                         <option value="popular">Most Popular</option>
-                                        <option value="trending">Trending</option>
-                                        <option value="rated">Highest Rated</option>
+                                        <option value="newest">Newest First</option>
                                         <option value="downloads">Most Downloads</option>
+                                        <option value="rated">Highest Rated</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Active Filters Display -->
+                    <div id="activeFilters" class="mb-6 flex flex-wrap gap-2">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/10 border border-accent/20 text-accent text-sm rounded-full">
+                            Nature
+                            <button class="hover:text-accent-600" aria-label="Remove filter">×</button>
+                        </span>
                     </div>
 
                     <!-- Wallpaper Gallery Grid -->
@@ -305,10 +290,33 @@
                     <!-- Load More Button -->
                     <div class="mt-12 text-center">
                         <button id="loadMoreBtn" class="btn-primary px-8 py-4 text-lg">
-                            <span>Load More Wallpapers</span>
+                            <span>Load More Results</span>
                             <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c8eb8633-1765284080467.png" alt="Load more icon" class="w-5 h-5">
                         </button>
-                        <p class="text-text-secondary text-sm mt-4">Showing dynamic results</p>
+                        <p class="text-text-secondary text-sm mt-4" id="showingCount">Showing 0 results</p>
+                    </div>
+
+                    <!-- Search Analytics Section -->
+                    <div class="card p-6 mt-8">
+                        <h3 class="font-semibold text-lg mb-4">Search Insights</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-accent" id="statBestMatch">-</p>
+                                <p class="text-sm text-text-secondary">Best Match</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-primary" id="statTotal">-</p>
+                                <p class="text-sm text-text-secondary">Total Results</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-success" id="statAvgDownloads">-</p>
+                                <p class="text-sm text-text-secondary">Avg. Downloads</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-secondary" id="statResolution">-</p>
+                                <p class="text-sm text-text-secondary">Resolution</p>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
@@ -317,17 +325,17 @@
 
     <!-- Quick Preview Modal -->
     <div id="previewModal" class="modal-overlay hidden items-center justify-center">
-        <div class="modal-content max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="modal-content max-w-5xl">
             <div class="relative">
                 <button id="closeModal" class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Close preview">
                     <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1d533db9c-1766571610545.png" alt="Close icon" class="w-6 h-6">
                 </button>
-                <img id="previewImage" src="" alt="Wallpaper preview" class="block w-auto max-w-full max-h-[60vh] mx-auto rounded-t-xl object-contain">
+                <img id="previewImage" src="" alt="Wallpaper preview" class="w-full h-auto rounded-t-xl">
                 <div class="p-6 bg-background-light rounded-b-xl">
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <h3 id="previewTitle" class="font-headline text-2xl mb-2">Wallpaper Title</h3>
-                            <p class="text-text-secondary">By <span id="previewCreator" class="text-primary font-medium">Creator Name</span></p>
+                            <p class="text-text-secondary">By <span id="previewCreator" class="text-primary font-medium">Featured Creator</span></p>
                         </div>
                         <button class="btn-accent">
                             <img src="https://img.rocket.new/generatedImages/rocket_gen_img_146cfa0c8-1764649038136.png" alt="Download icon" class="w-5 h-5">
@@ -347,6 +355,10 @@
                             <img src="https://images.unsplash.com/photo-1609189881391-aa3d820bf052" alt="Resolution" class="w-4 h-4">
                             4K Resolution
                         </span>
+                        <span class="flex items-center gap-2">
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_18ca43f61-1766803584117.png" alt="AI icon" class="w-4 h-4">
+                            <span id="previewRelevance">0</span>% Match
+                        </span>
                     </div>
                 </div>
             </div>
@@ -359,12 +371,10 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <!-- Brand Column -->
                 <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        </svg>
-                        <span class="font-headline text-2xl font-bold">PersepolisAI</span>
+                    <div class="mb-4">
+                        <span class="font-headline text-2xl font-bold">Persepolis IA</span>
                     </div>
-                    <p class="text-white/70 mb-4">Transform your digital space with curated, high-quality wallpapers.</p>
+                    <p class="text-white/70 mb-4">Transform your digital space with AI-powered, curated wallpapers.</p>
                     <div class="flex gap-4">
                         <a href="javascript:void(0)" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Instagram">
                             <img src="https://images.unsplash.com/photo-1698399480524-c6b256c2fe80" alt="Instagram" class="w-5 h-5">
@@ -383,8 +393,6 @@
                     <h3 class="font-semibold text-lg mb-4">Explore</h3>
                     <ul class="space-y-3">
                         <li><a href="browse.html" class="text-white/70 hover:text-white transition-colors">Browse Wallpapers</a></li>
-                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Collections</a></li>
-                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Creators</a></li>
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Trending</a></li>
                     </ul>
                 </div>
@@ -394,7 +402,6 @@
                     <h3 class="font-semibold text-lg mb-4">Resources</h3>
                     <ul class="space-y-3">
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Setup Guides</a></li>
-                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Creator Interviews</a></li>
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Wallpaper Trends</a></li>
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Blog</a></li>
                     </ul>
@@ -405,7 +412,6 @@
                     <h3 class="font-semibold text-lg mb-4">Company</h3>
                     <ul class="space-y-3">
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Premium</a></li>
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Contact</a></li>
                         <li><a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">FAQ</a></li>
                     </ul>
@@ -414,7 +420,7 @@
 
             <!-- Bottom Bar -->
             <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-white/70 text-sm">© 2025 PersepolisAI. All Rights Reserved.</p>
+                <p class="text-white/70 text-sm">© 2025 Persepolis IA. All Rights Reserved.</p>
                 <div class="flex gap-6 text-sm">
                     <a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Privacy Policy</a>
                     <a href="javascript:void(0)" class="text-white/70 hover:text-white transition-colors">Terms of Service</a>
@@ -424,21 +430,7 @@
         </div>
     </footer>
 
-    <div id="chatWindow" class="chat-window">
-        <div class="chat-header">
-            <span>Chat Support</span>
-            <span class="close-chat" id="closeChat">&times;</span>
-        </div>
-        <div class="chat-body">
-            <p>Hello! How can we help you today?</p>
-        </div>
-        <div class="chat-footer">
-            <input type="text" placeholder="Type a message...">
-        </div>
-    </div>
-
-    <script src="chat.js"></script>
-    <script src="browse.js"></script>
+    <script src="search_results.js"></script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>

@@ -3,6 +3,8 @@ package com.persepolis.IA.Scraper.sitios;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -40,5 +42,23 @@ public class Wallhaven extends SitioBase {
         datos.put("resolucion", (resInfo != null) ? resInfo.text() : "");
         datos.put("tipo", "Wallhaven");
         return datos;
+    }
+    @Override
+    public Map<String, String> obtenerDetalles(String url) {
+        Map<String, String> detalles = new HashMap<>();
+        try {
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0")
+                    .timeout(10000)
+                    .get();
+            
+            Element img = doc.selectFirst("img#wallpaper");
+            if (img != null) {
+                detalles.put("fullImageUrl", img.attr("src"));
+            }
+        } catch (Exception e) {
+            System.err.println("Error obteniendo detalles de Wallhaven: " + e.getMessage());
+        }
+        return detalles;
     }
 }
