@@ -33,22 +33,47 @@ public class IaApplication {
 
 	private void startFrontend() {
 		try {
+			File cwd = new File(".").getCanonicalFile();
+			System.out.println("--- Buscando frontend... (Desde: " + cwd.getPath() + ") ---");
+
+			// DEBUG: Listar carpetas visibles para ver por qué falla
+			File[] files = cwd.listFiles();
+			if (files != null) {
+				System.out.print("--- Carpetas visibles: ");
+				for (File f : files) if (f.isDirectory()) System.out.print("[" + f.getName() + "] ");
+				System.out.println("---");
+			}
+
 			// Buscamos dinámicamente la carpeta que contenga package.json
 			// Probamos rutas relativas para cuando se corre desde 'LMMfunction' o desde 'WallPaperSystem'
-			String[] possiblePaths = { "../front/Front", "front/Front", "../front", "front" };
+			String[] possiblePaths = { "../front/Front", "front/Front", "../front", "front", "../Front", "Front" };
 			File frontendDir = null;
 
 			for (String path : possiblePaths) {
 				File dir = new File(path);
-				// Verificamos que exista el directorio Y que tenga el package.json dentro
-				if (dir.exists() && dir.isDirectory() && new File(dir, "package.json").exists()) {
-					frontendDir = dir;
-					break;
+				if (dir.exists() && dir.isDirectory()) {
+					if (new File(dir, "package.json").exists()) {
+						frontendDir = dir;
+						break;
+					} else {
+						// Si encontramos la carpeta (ej: 'front') pero no tiene package.json, buscamos en sus subcarpetas (ej: 'front/Front')
+						File[] subDirs = dir.listFiles(File::isDirectory);
+						if (subDirs != null) {
+							for (File sub : subDirs) {
+								if (new File(sub, "package.json").exists()) {
+									frontendDir = sub;
+									break;
+								}
+							}
+						}
+						if (frontendDir != null) break;
+						System.out.println("--- DEBUG: Carpeta encontrada en '" + path + "' pero falta package.json (y no está en subcarpetas) ---");
+					}
 				}
 			}
 
 			// Solo intentar iniciar el frontend si estamos en Windows (Desarrollo local)
-			String os = System.getProperty("os.name").toLowerCase();
+			String os = System.getProperty("os.name", "").toLowerCase();
 			if (frontendDir != null && os.contains("win")) {
 				System.out.println("--- Frontend encontrado en: " + frontendDir.getCanonicalPath() + " ---");
 				// Usamos 'cmd /k' para mantener la ventana abierta y asegurar un entorno de shell correcto
@@ -61,8 +86,9 @@ public class IaApplication {
 				System.out.println("--- INFO: Frontend no iniciado automáticamente (Entorno no Windows o carpeta no encontrada). ---");
 				System.out.println("--- Directorio actual de ejecución: " + new File(".").getCanonicalPath());
 			}
-		} catch (IOException e) {
-			System.out.println("Nota: No se pudo iniciar el frontend automáticamente (" + e.getMessage() + ")");
+		} catch (Exception e) {
+			System.err.println("--- ERROR: No se pudo iniciar el frontend automáticamente ---");
+			e.printStackTrace();
 		}
 	}
 }
