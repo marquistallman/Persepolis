@@ -20,6 +20,14 @@ Para facilitar todo, hemos creado un menú interactivo. Si usas Windows, solo ne
 
 ¡Desde ahí podrás iniciar el servidor, guardar cambios o actualizar el diseño sin escribir comandos!
 
+## 🍎 Panel de Control (Mac/Linux)
+
+Si usas macOS o Linux, usa el script equivalente:
+
+1.  Abre una terminal en la carpeta `LMMfunction`.
+2.  Dale permisos de ejecución (solo la primera vez): `chmod +x menu.sh`
+3.  Ejecútalo: `./menu.sh`
+
 ## 🚀 Puesta en Marcha
 
 ### 1. Configuración Inicial
@@ -56,6 +64,16 @@ Este proyecto usa un sistema de **Frontend Desacoplado** para desarrollo, pero *
   ```
   
   *Esto actualizará la carpeta `src/main/resources/static` con la última versión del diseño.*
+
+### ✍️ Edición Visual (Grapes.js)
+
+Hemos integrado un editor visual para hacer ajustes rápidos al diseño sin tocar código.
+
+1.  Inicia el servidor (Opción 1 del menú).
+2.  Abre tu navegador y ve a: **http://localhost:8080/editor.html**
+3.  El editor cargará la `homepage.html` por defecto.
+4.  Realiza tus cambios visualmente.
+5.  Para obtener el código, busca el botón de "Ver Código" en el editor. Copia el resultado y pégalo en el archivo HTML correspondiente.
 
 ## 📦 Generar Ejecutable (Para Servidor/Producción)
 

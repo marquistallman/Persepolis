@@ -29,13 +29,21 @@ fi
 cd - > /dev/null || exit
 
 # 3. Copiar los archivos
-echo "--> Limpiando y copiando archivos a static..."
+echo "--> Limpiando y copiando archivos a static (filtrando)..."
 mkdir -p "$DEST_DIR"
 rm -rf "${DEST_DIR:?}"/*
-cp -r "$SOURCE_DIR"/* "$DEST_DIR"/
 
-# 4. Limpieza de archivos de desarrollo en destino
-echo "--> Eliminando archivos innecesarios (node_modules, configs)..."
-rm -rf "$DEST_DIR/node_modules" "$DEST_DIR/.git" "$DEST_DIR/package.json" "$DEST_DIR/package-lock.json" "$DEST_DIR/tailwind.config.js" "$DEST_DIR/.gitignore"
+# Copiar excluyendo node_modules y archivos de configuración
+if command -v rsync &> /dev/null; then
+    rsync -av --exclude='node_modules' --exclude='.git' --exclude='package.json' --exclude='package-lock.json' --exclude='tailwind.config.js' --exclude='.gitignore' "$SOURCE_DIR/" "$DEST_DIR/"
+else
+    for file in "$SOURCE_DIR"/*; do
+        name=$(basename "$file")
+        case "$name" in
+            node_modules|.git|package.json|package-lock.json|tailwind.config.js|.gitignore) ;;
+            *) cp -r "$file" "$DEST_DIR/" ;;
+        esac
+    done
+fi
 
 echo "INTEGRACIÓN COMPLETADA. Ahora puedes ejecutar 'mvn clean package'."
