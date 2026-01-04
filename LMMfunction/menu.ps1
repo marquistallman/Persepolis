@@ -116,19 +116,15 @@ function Integrate-Frontend {
     }
     Pop-Location
 
-    Write-Host "--> Copiando archivos a static..." -ForegroundColor Yellow
+    Write-Host "--> Copiando archivos a static (filtrando)..." -ForegroundColor Yellow
     if (-not (Test-Path $Dest)) { New-Item -ItemType Directory -Path $Dest | Out-Null }
     
-    # Limpiar destino y copiar
+    # Limpiar destino
     Get-ChildItem -Path $Dest -Recurse | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path "$Source\*" -Destination $Dest -Recurse -Force
-
-    # Limpiar basura de desarrollo
+    
+    # Copiar filtrando desde el origen (mucho más rápido)
     $Exclusions = @("node_modules", ".git", "package.json", "package-lock.json", "tailwind.config.js", ".gitignore")
-    foreach ($item in $Exclusions) {
-        $path = Join-Path $Dest $item
-        if (Test-Path $path) { Remove-Item $path -Recurse -Force -ErrorAction SilentlyContinue }
-    }
+    Get-ChildItem -Path $Source | Where-Object { $_.Name -notin $Exclusions } | Copy-Item -Destination $Dest -Recurse -Force
 
     Write-Host "✅ Diseño integrado correctamente." -ForegroundColor Green
     Pause-Script
@@ -182,6 +178,55 @@ function Fix-LargeFiles {
     Pause-Script
 }
 
+# --- Funciones Específicas para Frontend Dev ---
+
+function Frontend-Install {
+    if (-not (Check-Command "npm" "Node.js")) { Pause-Script; return }
+    $Source = "../front/Front"
+    if (-not (Test-Path $Source)) {
+        Write-Host "❌ Error: No encuentro la carpeta '../front/Front'." -ForegroundColor Red
+        Pause-Script
+        return
+    }
+    Write-Host "--> Instalando dependencias en $Source..." -ForegroundColor Yellow
+    Push-Location $Source
+    npm install
+    Pop-Location
+    Write-Host "✅ Dependencias instaladas." -ForegroundColor Green
+    Pause-Script
+}
+
+function Frontend-Dev {
+    if (-not (Check-Command "npm" "Node.js")) { Pause-Script; return }
+    $Source = "../front/Front"
+    if (-not (Test-Path $Source)) {
+        Write-Host "❌ Error: No encuentro la carpeta '../front/Front'." -ForegroundColor Red
+        Pause-Script
+        return
+    }
+    Write-Host "--> Iniciando modo desarrollo en $Source..." -ForegroundColor Yellow
+    Write-Host "(Presiona Ctrl+C para detener)" -ForegroundColor Cyan
+    Push-Location $Source
+    npm run dev
+    Pop-Location
+    Pause-Script
+}
+
+function Open-Browser {
+    $URL = "http://localhost:8080"
+    Write-Host "--> Abriendo $URL..." -ForegroundColor Yellow
+    Start-Process $URL
+    Pause-Script
+}
+
+function Show-Location {
+    Write-Host "--> Ubicación actual:" -ForegroundColor Cyan
+    Get-Location
+    Write-Host "--> Contenido:" -ForegroundColor Cyan
+    Get-ChildItem -Name
+    Pause-Script
+}
+
 # Bucle Principal
 do {
     Show-Header
@@ -190,6 +235,11 @@ do {
     Write-Host "3. 🎨 Integrar Frontend (Traer diseño nuevo)"
     Write-Host "4. 📦 Generar Ejecutable (.jar)"
     Write-Host "5. 🚑 Reparar error de subida (Archivos grandes)"
+    Write-Host "------------------------------------------"
+    Write-Host "6. 📦 Frontend: Instalar Dependencias (npm install)"
+    Write-Host "7. 🛠️  Frontend: Modo Desarrollo (npm run dev)"
+    Write-Host "8. 🌐 Abrir Navegador (localhost:8080)"
+    Write-Host "9. 📍 Ver ubicación actual"
     Write-Host "0. Salir"
     Write-Host ""
     
@@ -201,6 +251,10 @@ do {
         '3' { Integrate-Frontend }
         '4' { Build-Jar }
         '5' { Fix-LargeFiles }
+        '6' { Frontend-Install }
+        '7' { Frontend-Dev }
+        '8' { Open-Browser }
+        '9' { Show-Location }
         '0' { exit }
         default { Write-Host "Opción no válida." -ForegroundColor Red; Start-Sleep -Seconds 1 }
     }

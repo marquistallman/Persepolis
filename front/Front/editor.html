@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor Visual de Páginas</title>
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+    <script src="https://unpkg.com/grapesjs"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #333;
+        }
+        #gjs {
+            border: none;
+        }
+        /* Mejora la UI del editor */
+        .gjs-pn-panel {
+            background-color: #2D3748 !important;
+            color: #fff !important;
+        }
+        .gjs-pn-btn {
+            color: #fff !important;
+        }
+        .gjs-pn-btn.gjs-pn-active {
+            box-shadow: none !important;
+            background-color: #E53E3E !important;
+        }
+        .gjs-toolbar {
+            background-color: #2D3748 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gjs">
+        <!-- El contenido de la página se cargará aquí -->
+        <h1>Cargando editor...</h1>
+    </div>
+
+    <script type="text/javascript">
+        // Función para cargar el contenido de una página en el editor
+        async function loadPageContent(editor, url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                const htmlContent = await response.text();
+
+                // Grapes.js no puede procesar un documento HTML completo directamente.
+                // Extraemos el contenido del <body> y los estilos del <head>.
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                
+                // Extraer estilos (tanto <link> como <style>)
+                const styles = Array.from(doc.head.querySelectorAll('link[rel="stylesheet"], style'));
+                
+                // Limpiar el editor y cargar los nuevos componentes y estilos
+                editor.setComponents(doc.body.innerHTML);
+                editor.setStyle(styles.map(s => s.outerHTML).join('\n'));
+
+            } catch (error) {
+                console.error('Error al cargar la página en el editor:', error);
+                editor.setComponents(`
+                    <div style="padding: 50px; text-align: center; color: #333;">
+                        <h1>Error al cargar la página</h1>
+                        <p>No se pudo encontrar o cargar <strong>${url}</strong>. Asegúrate de que el servidor esté corriendo.</p>
+                    </div>
+                `);
+            }
+        }
+
+        // Inicializar el editor Grapes.js
+        const editor = grapesjs.init({
+            container: '#gjs',
+            height: '100vh',
+            width: 'auto',
+            // Deshabilitamos el guardado en localStorage para evitar conflictos
+            storageManager: false, 
+            // Indicamos que los estilos se manejarán en el <head>
+            assetManager: {
+                // Puedes configurar aquí un endpoint para subir imágenes si lo necesitas
+            },
+            canvas: {
+                styles: [
+                    // Es importante incluir el CSS compilado de Tailwind aquí
+                    'css/main.css'
+                ]
+            }
+        });
+
+        // Por defecto, cargamos la homepage cuando el editor esté listo
+        editor.on('load', () => {
+            loadPageContent(editor, 'pages/homepage.html');
+        });
+
+        // Añadimos un botón para "Exportar Código"
+        editor.Panels.addButton('options', {
+            id: 'export-code',
+            className: 'fa fa-code',
+            command: editor => {
+                const html = editor.getHtml();
+                const css = editor.getCss({avoidProtected: true});
+                console.log("CÓDIGO GENERADO (copia y pega en tu archivo HTML):");
+                console.log(html + '<style>' + css + '</style>');
+                alert("El código se ha mostrado en la consola (F12).");
+            },
+            attributes: { title: 'Ver Código' }
+        });
+    </script>
+<script id="dhws-dataInjector" src="/public/dhws-data-injector.js"></script>
+</body>
+</html>
