@@ -1,5 +1,6 @@
 package com.persepolis.IA;
 
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -8,6 +9,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
@@ -24,7 +26,18 @@ public class IaApplication {
 
 	@Bean
 	public CacheManager cacheManager() {
+		// Usamos el gestor de caché nativo de Spring (sin dependencias externas)
 		return new ConcurrentMapCacheManager("default");
+	}
+
+	// Limpieza manual de la caché global cada 30 minutos para liberar RAM
+	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.MINUTES)
+	public void clearGlobalCache() {
+		CacheManager cm = cacheManager();
+		if (cm instanceof ConcurrentMapCacheManager) {
+			cm.getCacheNames().forEach(name -> cm.getCache(name).clear());
+			System.out.println("--- Mantenimiento: Caché limpiada para liberar RAM ---");
+		}
 	}
 
 	@Bean
