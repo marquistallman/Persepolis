@@ -46,4 +46,10 @@ echo "Sincronizando con rama '$BRANCH'..."
 git pull origin "$BRANCH"
 if [ "$MODE" != "1" ]; then git checkout "$BRANCH"; fi
 
+# Limpieza extra para Modo Servidor
+if [ "$MODE" == "1" ]; then
+    echo "Limpiando archivos residuales..."
+    git clean -fdX
+fi
+
 echo "--- Operación Completada ---"
