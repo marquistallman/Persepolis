@@ -1,0 +1,13 @@
+# 1. Ignorar TODO por defecto
+*
+
+# 2. Permitir carpetas (necesario para entrar en ellas)
+!*/
+
+# 3. Lista Blanca: Qué archivos y carpetas SÍ queremos
+!setup_server.ps1
+!setup_server.sh
+!README.md
+!.gitignore
+
+# 4. Excepciones extra: Ignorar basura dentro de las carpetas permitidas
