@@ -47,4 +47,10 @@ Write-Host "Sincronizando con rama '$Branch'..."
 git pull origin $Branch
 if ($Mode -ne "1") { git checkout $Branch } # Asegurar checkout en modo dev
 
+# Limpieza extra para Modo Servidor: Borrar archivos no rastreados (basura)
+if ($Mode -eq "1") {
+    Write-Host "Limpiando archivos residuales..."
+    git clean -fdX
+}
+
 Write-Host "--- Operación Completada ---" -ForegroundColor Green
