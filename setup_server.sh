@@ -5,14 +5,10 @@ REPO_URL="https://github.com/marquistallman/Persepolis.git"
 
 echo "--- Configuración de Entorno Persepolis ---"
 
-# 1. Preguntar Rama
-read -p "Introduce la rama a utilizar (Enter para 'dev'): " BRANCH_INPUT
-BRANCH=${BRANCH_INPUT:-dev}
-
-# 2. Preguntar Modo
+# 1. Preguntar Modo
 echo -e "\nSelecciona el modo de instalación:"
-echo "1. Servidor (Producción) -> Descarga ligera (Solo LMMfunction y data)"
-echo "2. Desarrollo (Local)    -> Descarga completa (Todo el repositorio)"
+echo "1. Servidor (Producción) -> Rama 'server' (Descarga ligera)"
+echo "2. Desarrollo (Local)    -> Rama 'developer' (Descarga completa)"
 read -p "Opción (1 o 2): " MODE
 
 # 3. Inicializar Git
@@ -26,30 +22,30 @@ else
 fi
 
 # 4. Configurar según la elección
+# Desactivar sparse checkout
+git config core.sparseCheckout false
+
 if [ "$MODE" == "1" ]; then
-    echo "Modo SERVIDOR seleccionado. Activando Sparse Checkout..."
-    git config core.sparseCheckout true
-    
-    echo "Configurando filtros..."
-    echo "LMMfunction/" > .git/info/sparse-checkout
-    echo "data/" >> .git/info/sparse-checkout
-    echo "setup_server.sh" >> .git/info/sparse-checkout
-    echo "setup_server.ps1" >> .git/info/sparse-checkout
-    echo "README.md" >> .git/info/sparse-checkout
+    BRANCH="server"
+    echo "Modo SERVIDOR seleccionado. Preparando rama 'server'..."
 else
-    echo "Modo DESARROLLO seleccionado. Descarga completa..."
-    git config core.sparseCheckout false
+    BRANCH="developer"
+    echo "Modo DESARROLLO seleccionado. Preparando rama 'developer'..."
 fi
 
 # 5. Descargar contenido
 echo "Sincronizando con rama '$BRANCH'..."
 git pull origin "$BRANCH"
-if [ "$MODE" != "1" ]; then git checkout "$BRANCH"; fi
+git checkout "$BRANCH"
 
 # Limpieza extra para Modo Servidor
 if [ "$MODE" == "1" ]; then
     echo "Limpiando archivos residuales..."
-    git clean -fdX
+    # Limpieza profunda
+    git clean -fdx
+
+    echo "Eliminando instaladores y documentación..."
+    rm -f setup_server.ps1 .gitignore README.md setup_server.sh
 fi
 
 echo "--- Operación Completada ---"

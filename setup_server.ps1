@@ -4,14 +4,10 @@ $RepoUrl = "https://github.com/marquistallman/Persepolis.git"
 
 Write-Host "--- Configuración de Entorno Persepolis ---" -ForegroundColor Cyan
 
-# 1. Preguntar Rama
-$BranchInput = Read-Host "Introduce la rama a utilizar (Presiona Enter para 'dev')"
-$Branch = if ([string]::IsNullOrWhiteSpace($BranchInput)) { "dev" } else { $BranchInput }
-
-# 2. Preguntar Modo
+# 1. Preguntar Modo
 Write-Host "`nSelecciona el modo de instalación:"
-Write-Host "1. Servidor (Producción) -> Descarga ligera (Solo LMMfunction y data)"
-Write-Host "2. Desarrollo (Local)    -> Descarga completa (Todo el repositorio)"
+Write-Host "1. Servidor (Producción) -> Rama 'server' (Descarga ligera)"
+Write-Host "2. Desarrollo (Local)    -> Rama 'developer' (Descarga completa)"
 $Mode = Read-Host "Opción (1 o 2)"
 
 # 3. Inicializar Git
@@ -25,32 +21,30 @@ if (-not (Test-Path ".git")) {
 }
 
 # 4. Configurar según la elección
+# Desactivar sparse checkout para evitar conflictos y bajar la rama completa
+git config core.sparseCheckout false
+
 if ($Mode -eq "1") {
-    Write-Host "Modo SERVIDOR seleccionado. Activando Sparse Checkout..."
-    git config core.sparseCheckout true
-    
-    $SparseFile = ".git/info/sparse-checkout"
-    Write-Host "Configurando filtros..."
-    Set-Content -Path $SparseFile -Value "LMMfunction/"
-    Add-Content -Path $SparseFile -Value "data/"
-    Add-Content -Path $SparseFile -Value "setup_server.ps1"
-    Add-Content -Path $SparseFile -Value "setup_server.sh"
-    Add-Content -Path $SparseFile -Value "README.md"
+    $Branch = "server"
+    Write-Host "Modo SERVIDOR seleccionado. Preparando rama 'server'..."
 } else {
-    Write-Host "Modo DESARROLLO seleccionado. Descarga completa..."
-    git config core.sparseCheckout false
-    # Si existía configuración previa de sparse, esto asegura que se baje todo
+    $Branch = "developer"
+    Write-Host "Modo DESARROLLO seleccionado. Preparando rama 'developer'..."
 }
 
 # 5. Descargar contenido
 Write-Host "Sincronizando con rama '$Branch'..."
 git pull origin $Branch
-if ($Mode -ne "1") { git checkout $Branch } # Asegurar checkout en modo dev
+git checkout $Branch
 
 # Limpieza extra para Modo Servidor: Borrar archivos no rastreados (basura)
 if ($Mode -eq "1") {
     Write-Host "Limpiando archivos residuales..."
-    git clean -fdX
+    # Limpieza profunda de Git (x minúscula = borra todo lo no rastreado)
+    git clean -fdx
+
+    Write-Host "Eliminando instaladores y documentación..."
+    Remove-Item -Path "setup_server.sh", ".gitignore", "README.md", "setup_server.ps1" -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "--- Operación Completada ---" -ForegroundColor Green
