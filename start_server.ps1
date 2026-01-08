@@ -23,8 +23,8 @@ if ($Option -eq "1") {
     if ($LASTEXITCODE -ne 0) { Write-Host "Error: No se pudo conectar con el repositorio."; exit }
     
     Write-Host "Recibiendo cambios..."
-    git checkout developer
-    git pull origin developer
+    # Copiar carpetas especificas sin cambiar de rama (Extracción segura)
+    git checkout origin/developer -- LMMfunction/ data/
 }
 elseif ($Option -eq "2") {
     Write-Host "Configurando instalación del sistema..."
@@ -37,19 +37,18 @@ elseif ($Option -eq "2") {
     
     Set-Content -Path $SparseFile -Value "LMMfunction/"
     Add-Content -Path $SparseFile -Value "data/"
-    Add-Content -Path $SparseFile -Value "setup_server.ps1"
-    Add-Content -Path $SparseFile -Value "setup_server.sh"
+    Add-Content -Path $SparseFile -Value "start_server.ps1"
+    Add-Content -Path $SparseFile -Value "start_server.sh"
+    Add-Content -Path $SparseFile -Value "mount_server.ps1"
+    Add-Content -Path $SparseFile -Value "mount_server.sh"
     Add-Content -Path $SparseFile -Value "README.md"
     
     Write-Host "Descargando archivos del sistema..."
     git fetch origin developer
     if ($LASTEXITCODE -ne 0) { Write-Host "Error: No se pudo conectar con el repositorio."; exit }
     
-    # Forzar estado exacto de la rama
-    git checkout -f -B developer origin/developer
-    
-    Write-Host "Limpiando archivos no necesarios..."
-    git clean -fdx
+    # Copiar carpetas especificas sin cambiar de rama (Extracción segura)
+    git checkout origin/developer -- LMMfunction/ data/
 }
 elseif ($Option -eq "3") {
     exit

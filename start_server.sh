@@ -24,8 +24,8 @@ if [ "$OPTION" == "1" ]; then
     if [ $? -ne 0 ]; then echo "Error: No se pudo conectar con el repositorio."; exit 1; fi
     
     echo "Recibiendo cambios..."
-    git checkout developer
-    git pull origin developer
+    # Copiar carpetas especificas sin cambiar de rama
+    git checkout origin/developer -- LMMfunction/ data/
 
 elif [ "$OPTION" == "2" ]; then
     echo "Configurando instalación del sistema..."
@@ -36,24 +36,36 @@ elif [ "$OPTION" == "2" ]; then
     
     echo "LMMfunction/" > .git/info/sparse-checkout
     echo "data/" >> .git/info/sparse-checkout
-    echo "setup_server.ps1" >> .git/info/sparse-checkout
-    echo "setup_server.sh" >> .git/info/sparse-checkout
+    echo "start_server.ps1" >> .git/info/sparse-checkout
+    echo "start_server.sh" >> .git/info/sparse-checkout
+    echo "mount_server.ps1" >> .git/info/sparse-checkout
+    echo "mount_server.sh" >> .git/info/sparse-checkout
     echo "README.md" >> .git/info/sparse-checkout
     
     echo "Descargando archivos del sistema..."
     git fetch origin developer
     if [ $? -ne 0 ]; then echo "Error: No se pudo conectar con el repositorio."; exit 1; fi
     
-    # Forzar estado
-    git checkout -f -B developer origin/developer
-    
-    echo "Limpiando archivos no necesarios..."
-    git clean -fdx
+    # Copiar carpetas especificas sin cambiar de rama
+    git checkout origin/developer -- LMMfunction/ data/
 
 elif [ "$OPTION" == "3" ]; then
     exit 0
 else
     echo "Opción no válida."
+fi
+
+if [ "$OPTION" == "1" ] || [ "$OPTION" == "2" ]; then
+    echo ""
+    read -p "¿Desea continuar ejecutando 'mount_server.sh'? (S/N): " CONTINUE
+    if [[ "$CONTINUE" == "S" || "$CONTINUE" == "s" ]]; then
+        if [ -f "mount_server.sh" ]; then
+            chmod +x mount_server.sh
+            ./mount_server.sh
+        else
+            echo "Error: mount_server.sh no encontrado."
+        fi
+    fi
 fi
 
 echo "--- Proceso Finalizado ---"

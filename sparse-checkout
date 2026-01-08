@@ -1,0 +1,7 @@
+LMMfunction/
+data/
+start_server.ps1
+start_server.sh
+mount_server.ps1
+mount_server.sh
+README.md
