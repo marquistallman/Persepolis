@@ -41,6 +41,7 @@ elseif ($Option -eq "2") {
     Add-Content -Path $SparseFile -Value "start_server.sh"
     Add-Content -Path $SparseFile -Value "mount_server.ps1"
     Add-Content -Path $SparseFile -Value "mount_server.sh"
+    Add-Content -Path $SparseFile -Value "control_server.sh"
     Add-Content -Path $SparseFile -Value "README.md"
     
     Write-Host "Descargando archivos del sistema..."

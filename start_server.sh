@@ -41,6 +41,7 @@ elif [ "$OPTION" == "2" ]; then
     echo "README.md" >> .git/info/sparse-checkout
     echo "mount_server.ps1" >> .git/info/sparse-checkout
     echo "mount_server.sh" >> .git/info/sparse-checkout
+    echo "control_server.sh" >> .git/info/sparse-checkout
     
     echo "Descargando archivos del sistema..."
     git fetch origin developer
