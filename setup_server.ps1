@@ -34,26 +34,20 @@ if ($Mode -eq "1") {
 
 # 5. Descargar contenido
 Write-Host "Sincronizando con rama '$Branch'..."
-
-# Usamos fetch para descargar sin fusionar todavía
-git fetch origin $Branch
+git pull origin $Branch
+git checkout $Branch
+# Limpieza extra para Modo Servidor: Borrar archivos no rastreados (basura)
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR CRÍTICO: La rama '$Branch' no existe o no se pudo acceder." -ForegroundColor Red
     exit
 }
-
-# Forzamos que el directorio local sea IDÉNTICO a la rama remota
-# -B crea o resetea la rama local para que apunte exactamente a origin/$Branch
-git checkout -f -B $Branch origin/$Branch
-
-# Limpieza extra para Modo Servidor: Borrar archivos no rastreados (basura)
-if ($Mode -eq "1") {
+if ($Mode -eq "1"){
     Write-Host "Limpiando archivos residuales..."
     # Limpieza profunda de Git (x minúscula = borra todo lo no rastreado)
     git clean -fdx
 
-    Write-Host "Eliminando instaladores y documentación..."
-    Remove-Item -Path "setup_server.sh", ".gitignore", "README.md", "setup_server.ps1" -Force -ErrorAction SilentlyContinue
+    
 }
-
 Write-Host "--- Operación Completada ---" -ForegroundColor Green
+Write-Host "Eliminando instaladores y documentación..."
+Remove-Item -Path "setup_server.sh", ".gitignore", "README.md", "setup_server.ps1" -Force -ErrorAction SilentlyContinue
