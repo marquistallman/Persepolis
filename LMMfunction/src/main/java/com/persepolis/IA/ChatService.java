@@ -6,6 +6,7 @@ import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import com.persepolis.IA.services.AiClient;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +47,9 @@ public class ChatService {
     public Mono<Map<String, Object>> processMessage(String message, String userId) {
         if (message == null) return Mono.just(simpleResponse(""));
         String lower = message.trim().toLowerCase(Locale.ROOT);
+
+        // Actualizar timestamp de última interacción si la sesión existe
+        if (sessions.containsKey(userId)) sessions.get(userId).lastInteraction = LocalDateTime.now();
 
         // 1. Verificar si el usuario está en medio de un cuestionario activo
         // ESTE ES EL BUCLE DE INTERACCIÓN: Mientras exista la sesión, el usuario "se queda" aquí.
@@ -183,6 +188,16 @@ public class ChatService {
         return aiClient.generate(prompt, false);
     }
 
+    // --- GESTIÓN DE MEMORIA ---
+    // Ejecutar cada hora (3600000 ms) para limpiar sesiones inactivas
+    @Scheduled(fixedRate = 3600000)
+    public void cleanupInactiveSessions() {
+        LocalDateTime limit = LocalDateTime.now().minusHours(1);
+        int initialSize = sessions.size();
+        sessions.entrySet().removeIf(entry -> entry.getValue().lastInteraction.isBefore(limit));
+        if (initialSize > sessions.size()) System.out.println("--- MEMORY CLEANUP: Sesiones limpiadas: " + (initialSize - sessions.size()));
+    }
+
     private String extractKeywords(String text) {
         String processed = text.toLowerCase(Locale.ROOT);
 
@@ -296,5 +311,6 @@ public class ChatService {
         boolean isStandard = false;
         boolean waitingForSatisfaction = false;
         String lastGeneratedQuery;
+        LocalDateTime lastInteraction = LocalDateTime.now();
     }
 }

@@ -13,8 +13,13 @@ public class Wallhaven extends SitioBase {
     public String getNombre() { return "Wallhaven"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
-        return "https://wallhaven.cc/search?q=" + URLEncoder.encode(query, "UTF-8");
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        return "https://wallhaven.cc/search?q=" + URLEncoder.encode(query, "UTF-8") + "&page=" + page;
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        return "https://wallhaven.cc/toplist?purity=100&sorting=toplist&order=desc&page=" + page;
     }
 
     @Override

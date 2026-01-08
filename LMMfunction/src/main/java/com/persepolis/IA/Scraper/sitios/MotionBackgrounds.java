@@ -12,8 +12,15 @@ public class MotionBackgrounds extends SitioBase {
     public String getNombre() { return "Motion Backgrounds"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        if (page > 1) return "https://motionbgs.com/page/" + page + "/?s=" + URLEncoder.encode(query, "UTF-8");
         return "https://motionbgs.com/?s=" + URLEncoder.encode(query, "UTF-8");
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        if (page > 1) return "https://motionbgs.com/page/" + page + "/";
+        return "https://motionbgs.com/";
     }
 
     @Override

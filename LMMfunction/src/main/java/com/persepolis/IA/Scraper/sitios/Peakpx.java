@@ -11,8 +11,13 @@ public class Peakpx extends SitioBase {
     public String getNombre() { return "Peakpx"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
-        return "https://www.peakpx.com/en/search?q=" + URLEncoder.encode(query, "UTF-8");
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        return "https://www.peakpx.com/en/search?q=" + URLEncoder.encode(query, "UTF-8") + "&page=" + page;
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        return "https://www.peakpx.com/en/page/" + page;
     }
 
     @Override

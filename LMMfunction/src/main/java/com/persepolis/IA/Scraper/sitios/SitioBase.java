@@ -19,15 +19,21 @@ public abstract class SitioBase {
     };
     
     public abstract String getNombre();
-    public abstract String generarUrlBusqueda(String query) throws Exception;
+    public abstract String generarUrlBusqueda(String query, int page) throws Exception;
+    public abstract String getUrlPopulares(int page); // Nuevo contrato para la página principal
     protected abstract Elements obtenerElementosRelevantes(Document doc);
     public abstract WallpaperDTO extraerDatos(Element elemento);
     
     // Método principal que orquesta la búsqueda y gestiona la memoria
-    public List<WallpaperDTO> buscar(String query) {
+    public List<WallpaperDTO> buscar(String query, int page) {
         List<WallpaperDTO> resultados = new ArrayList<>();
         try {
-            String url = generarUrlBusqueda(query);
+            String url;
+            if ("popular".equalsIgnoreCase(query)) {
+                url = getUrlPopulares(page);
+            } else {
+                url = generarUrlBusqueda(query, page);
+            }
             // El Document solo vive dentro de este bloque try
             Document doc = crearConexion(url).get();
             Elements elementos = obtenerElementosRelevantes(doc);

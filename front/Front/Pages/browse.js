@@ -9,7 +9,8 @@ const BrowseModule = {
         viewMode: 'medium',
         searchTimeout: null,
         filterColor: null,
-        filterOrientation: 'All'
+        filterOrientation: 'All',
+        currentPage: 1
     },
 
     init() {
@@ -62,10 +63,12 @@ const BrowseModule = {
             const originalContent = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<span>Loading...</span>';
-            setTimeout(() => {
+            
+            this.state.currentPage++;
+            this.fetchWallpapers(this.dom.searchInput.value || 'popular', true).then(() => {
                 btn.disabled = false;
                 btn.innerHTML = originalContent;
-            }, 1000);
+            });
         });
 
         // --- FILTROS ---
@@ -266,7 +269,7 @@ const BrowseModule = {
                     fullUrl: item.url || props.enlace || '#',
                     category: props.sitio || props.tipo || 'Web',
                     resolution: props.resolucion || props.info || '',
-                    hasVideo: props.hasVideo === 'true',
+                    hasVideo: props.hasVideo === true || props.hasVideo === 'true',
                     rawContent: item.htmlContent // Guardamos el contenido original para enviarlo de vuelta al interactuar
                 };
             });

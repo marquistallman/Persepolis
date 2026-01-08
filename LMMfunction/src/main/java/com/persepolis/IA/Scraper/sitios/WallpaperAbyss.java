@@ -11,8 +11,13 @@ public class WallpaperAbyss extends SitioBase {
     public String getNombre() { return "Wallpaper Abyss"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
-        return "https://wall.alphacoders.com/search.php?search=" + URLEncoder.encode(query, "UTF-8");
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        return "https://wall.alphacoders.com/search.php?search=" + URLEncoder.encode(query, "UTF-8") + "&page=" + page;
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        return "https://wall.alphacoders.com/popular.php?page=" + page;
     }
 
     @Override

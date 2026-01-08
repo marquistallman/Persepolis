@@ -11,8 +11,13 @@ public class WallpaperFlare extends SitioBase {
     public String getNombre() { return "Wallpaper Flare"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
-        return "https://www.wallpaperflare.com/search?wallpaper=" + URLEncoder.encode(query, "UTF-8");
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        return "https://www.wallpaperflare.com/search?wallpaper=" + URLEncoder.encode(query, "UTF-8") + "&page=" + page;
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        return "https://www.wallpaperflare.com/index.php?page=" + page;
     }
 
     @Override
