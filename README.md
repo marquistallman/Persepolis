@@ -6,8 +6,8 @@ Este repositorio contiene la configuración automatizada para desplegar el servi
 
 El proyecto incluye scripts interactivos que gestionan la configuración de Git y las descargas de archivos según el entorno.
 
-- **Windows:** `setup_server.ps1`
-- **Linux/Mac:** `setup_server.sh`
+ - **Windows:** `start_server.ps1`
+ - **Linux/Mac:** `start_server.sh`
 
 ## Menú de Gestión
 
@@ -19,20 +19,36 @@ Actualiza el repositorio con los últimos cambios de la rama de desarrollo. Úti
 ### 2. Instalar Sistema (LMMfunction y data)
 Configura el entorno de producción. Activa el filtrado de carpetas (*Sparse Checkout*) para descargar únicamente el código fuente (`LMMfunction`) y los datos (`data`), eliminando cualquier otro archivo innecesario.
 
+## Control del Servidor (Producción)
+
+El script `control_server.sh` permite gestionar el ciclo de vida del servidor utilizando `tmux` para mantener los procesos activos.
+
+| Comando | Descripción |
+| :--- | :--- |
+| `./control_server.sh start` | Inicia el backend Java y el túnel Cloudflare en segundo plano. |
+| `./control_server.sh stop` | Detiene la sesión y cierra los procesos. |
+| `./control_server.sh restart` | Reinicia el servidor. |
+| `./control_server.sh attach` | Muestra la consola en tiempo real. (Para salir sin detener: `Ctrl+B`, luego `D`). |
+
 ## Instrucciones Rápidas
 
 ### En Windows
 1. Abre PowerShell en la carpeta del proyecto.
 2. Ejecuta:
    ```powershell
-   .\setup_server.ps1
+   .\start_server.ps1
    ```
 3. Sigue las instrucciones en pantalla.
 
 ### En Linux (VPS)
-1. Sube el archivo `setup_server.sh` al servidor.
+1. Sube el archivo `start_server.sh` al servidor.
 2. Dale permisos de ejecución y ejecútalo:
    ```bash
-   chmod +x setup_server.sh
-   ./setup_server.sh
+   chmod +x start_server.sh
+   ./start_server.sh
+   ```
+3. Una vez instalado, usa el script de control para iniciar el servicio:
+   ```bash
+   chmod +x control_server.sh
+   ./control_server.sh start
    ```
