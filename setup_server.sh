@@ -44,8 +44,9 @@ if [ "$MODE" == "1" ]; then
     # Limpieza profunda
     git clean -fdx
 
-    echo "Eliminando instaladores y documentación..."
-    rm -f setup_server.ps1 .gitignore README.md setup_server.sh
+    
 fi
 
 echo "--- Operación Completada ---"
+echo "Eliminando instaladores y documentación..."
+rm -f setup_server.ps1 .gitignore README.md setup_server.sh
