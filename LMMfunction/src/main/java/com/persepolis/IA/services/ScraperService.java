@@ -3,6 +3,7 @@ package com.persepolis.IA.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.persepolis.IA.Scraper.CScrap;
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import com.persepolis.IA.model.WebCache;
 import com.persepolis.IA.repository.WebCacheRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class ScraperService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<Map<String, String>> searchWallpapers(String query) {
+    public List<WallpaperDTO> searchWallpapers(String query) {
         String normalizedQuery = query.trim().toLowerCase();
         String cacheKey = "search:" + normalizedQuery;
 
@@ -44,7 +45,7 @@ public class ScraperService {
         try {
             System.out.println("--- Realizando búsqueda REAL para: " + query);
             CScrap scraper = new CScrap();
-            List<Map<String, String>> results = scraper.buscarWeb(normalizedQuery);
+            List<WallpaperDTO> results = scraper.buscarWeb(normalizedQuery);
             
             // DEBUG: log cantidad antes de guardar
             System.out.println("--- DEBUG: Scraper encontró (antes guardar) " + results.size() + " items ---");
@@ -82,7 +83,7 @@ public class ScraperService {
         }
     }
 
-    public Map<String, String> getWallpaperDetails(String url, String site) {
+    public WallpaperDTO getWallpaperDetails(String url, String site) {
         String cacheKey = "details:" + site + ":" + url;
 
         Optional<WebCache> cached = webCacheRepository.findByCacheKey(cacheKey);
@@ -92,21 +93,21 @@ public class ScraperService {
             long days = ChronoUnit.DAYS.between(data.getLastUpdated(), LocalDateTime.now());
             if (days < DETAILS_CACHE_DAYS) {
                  System.out.println("--- Devolviendo detalles desde CACHÉ para: " + url);
-                return fromJsonToMap(data.getContent());
+                return fromJsonToDto(data.getContent());
             }
         }
 
         try {
             System.out.println("--- Obteniendo detalles REALES para: " + url);
             CScrap scraper = new CScrap();
-            Map<String, String> details = scraper.obtenerDetalles(url, site);
+            WallpaperDTO details = scraper.obtenerDetalles(url, site);
 
             saveToCache(cacheKey, toJson(details));
             return details;
         } catch (Exception e) {
             System.err.println("--- ERROR en ScraperService (Detalles): " + e.getMessage());
             e.printStackTrace();
-            return Map.of("error", "No se pudieron obtener los detalles");
+            return new WallpaperDTO();
         }
     }
 
@@ -130,11 +131,11 @@ public class ScraperService {
         try { return objectMapper.writeValueAsString(object); } catch (Exception e) { return "{}"; }
     }
 
-    private List<Map<String, String>> fromJsonToList(String json) {
-        try { return objectMapper.readValue(json, new TypeReference<>() {}); } catch (Exception e) { return List.of(); }
+    private List<WallpaperDTO> fromJsonToList(String json) {
+        try { return objectMapper.readValue(json, new TypeReference<List<WallpaperDTO>>() {}); } catch (Exception e) { return List.of(); }
     }
 
-    private Map<String, String> fromJsonToMap(String json) {
-        try { return objectMapper.readValue(json, new TypeReference<>() {}); } catch (Exception e) { return Map.of(); }
+    private WallpaperDTO fromJsonToDto(String json) {
+        try { return objectMapper.readValue(json, WallpaperDTO.class); } catch (Exception e) { return new WallpaperDTO(); }
     }
 }

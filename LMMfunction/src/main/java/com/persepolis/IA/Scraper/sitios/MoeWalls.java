@@ -1,8 +1,7 @@
 package com.persepolis.IA.Scraper.sitios;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,36 +17,33 @@ public class MoeWalls extends SitioBase {
     }
 
     @Override
-    public Elements obtenerElementosRelevantes(Document doc) {
+    protected Elements obtenerElementosRelevantes(Document doc) {
         return buscarPorSelectores(doc, "article.post");
     }
 
     @Override
-    public Map<String, String> extraerDatos(Element elemento) {
-        Map<String, String> datos = new HashMap<>();
+    public WallpaperDTO extraerDatos(Element elemento) {
+        WallpaperDTO dto = new WallpaperDTO();
         Element titleElement = elemento.selectFirst("h3.entry-title a");
-        datos.put("titulo", (titleElement != null) ? titleElement.text() : "Moe Walls Wallpaper");
-        datos.put("enlace", (titleElement != null) ? titleElement.attr("href") : "");
+        dto.setTitulo((titleElement != null) ? titleElement.text() : "Moe Walls Wallpaper");
+        dto.setEnlace((titleElement != null) ? titleElement.attr("href") : "");
         
         Element img = elemento.selectFirst(".entry-featured-media img");
-        datos.put("preview", (img != null) ? img.attr("src") : "");
+        dto.setPreview((img != null) ? img.attr("src") : "");
         
         Element resElement = elemento.selectFirst(".entry-resolutions a");
-        datos.put("resolucion", (resElement != null) ? resElement.text() : "");
+        dto.setResolucion((resElement != null) ? resElement.text() : "");
         
-        datos.put("tipo", "Moe Walls");
-        datos.put("hasVideo", "true");
-        return datos;
+        dto.setTipo("Moe Walls");
+        dto.setHasVideo(true);
+        return dto;
     }
 
     @Override
-    public Map<String, String> obtenerDetalles(String url) {
-        Map<String, String> detalles = new HashMap<>();
+    public WallpaperDTO obtenerDetalles(String url) {
+        WallpaperDTO detalles = new WallpaperDTO();
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0")
-                    .timeout(10000)
-                    .get();
+            Document doc = crearConexion(url).get();
 
             // Buscamos el video y usamos abs:src para obtener la URL completa (incluyendo dominio)
             Element video = doc.selectFirst("video");
@@ -59,8 +55,7 @@ public class MoeWalls extends SitioBase {
                 }
                 
                 if (!src.isEmpty()) {
-                    detalles.put("videoUrl", src);
-                    detalles.put("tipoContenido", "video");
+                    detalles.setVideoUrl(src);
                 }
             }
         } catch (Exception e) {

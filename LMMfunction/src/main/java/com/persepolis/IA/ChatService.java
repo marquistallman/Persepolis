@@ -2,6 +2,7 @@ package com.persepolis.IA;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.persepolis.IA.Scraper.CScrap;
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import com.persepolis.IA.services.AiClient;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -216,38 +217,42 @@ public class ChatService {
         try {
             CScrap scraper = new CScrap();
             String[] keywords = query.split("\\|\\|\\|");
-            Map<String, List<Map<String, String>>> searchCache = new HashMap<>();
-            Map<Map<String, String>, Integer> resultCounts = new HashMap<>();
+            Map<String, List<WallpaperDTO>> searchCache = new HashMap<>();
+            
+            // Usamos Maps auxiliares para contar duplicados basándonos en la URL
+            Map<String, WallpaperDTO> uniqueResults = new HashMap<>();
+            Map<String, Integer> urlCounts = new HashMap<>();
 
             for (String keyword : keywords) {
                 String k = keyword.trim();
                 if (k.isEmpty()) continue;
                 
                 // Usamos caché para no llamar al scraper múltiples veces por la misma palabra (debido al peso)
-                List<Map<String, String>> results = searchCache.computeIfAbsent(k, key -> scraper.buscarWeb(key));
+                List<WallpaperDTO> results = searchCache.computeIfAbsent(k, key -> scraper.buscarWeb(key));
                 
                 if (results != null) {
-                    for (Map<String, String> result : results) {
+                    for (WallpaperDTO result : results) {
                         if (isSupportContent(result)) continue;
-                        resultCounts.put(result, resultCounts.getOrDefault(result, 0) + 1);
+                        String url = result.getEnlace();
+                        if (url == null) continue;
+                        
+                        uniqueResults.putIfAbsent(url, result);
+                        urlCounts.put(url, urlCounts.getOrDefault(url, 0) + 1);
                     }
                 }
             }
             
-            if (resultCounts.isEmpty()) {
+            if (urlCounts.isEmpty()) {
                 return simpleResponse(chatData.getResponse("noResults", query));
             }
 
-            List<Map.Entry<Map<String, String>, Integer>> sortedResults = new ArrayList<>(resultCounts.entrySet());
-            sortedResults.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+            List<WallpaperDTO> finalResultsList = urlCounts.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // Ordenar por popularidad (conteo)
+                .map(e -> uniqueResults.get(e.getKey()))
+                .collect(Collectors.toList());
 
             StringBuilder sb = new StringBuilder(chatData.getResponse("resultsHeader", originalRequest));
             
-            // Extraer la lista limpia de resultados para el frontend
-            List<Map<String, String>> finalResultsList = sortedResults.stream()
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
             response.put("message", sb.toString());
             response.put("results", finalResultsList);
             return response;
@@ -263,18 +268,19 @@ public class ChatService {
         return map;
     }
 
-    private boolean isSupportContent(Map<String, String> result) {
-        for (String val : result.values()) {
+    private boolean isSupportContent(WallpaperDTO result) {
+        // Verificamos campos específicos del DTO
+        String[] fieldsToCheck = {result.getTitulo(), result.getEnlace(), result.getTipo()};
+        
+        for (String val : fieldsToCheck) {
             if (val == null) continue;
             String v = val.toLowerCase();
             if (v.contains("support") || v.contains("help") || v.contains("contact") || 
                 v.contains("faq") || v.contains("policy") || v.contains("terms")) return true;
             
-            // Filtros de limpieza (categorías, tutoriales, login)
             if (v.contains("/category/") || v.contains("/tag/") || v.contains("how to set") || 
                 v.contains("login") || v.contains("signup") || v.contains("register")) return true;
             
-            // Filtrar homepages (URLs cortas sin path)
             if (v.startsWith("http")) {
                 String url = v.endsWith("/") ? v.substring(0, v.length() - 1) : v;
                 if (url.split("/").length <= 3) return true;
