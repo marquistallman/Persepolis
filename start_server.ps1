@@ -37,8 +37,10 @@ elseif ($Option -eq "2") {
     
     Set-Content -Path $SparseFile -Value "LMMfunction/"
     Add-Content -Path $SparseFile -Value "data/"
-    Add-Content -Path $SparseFile -Value "setup_server.ps1"
-    Add-Content -Path $SparseFile -Value "setup_server.sh"
+    Add-Content -Path $SparseFile -Value "start_server.ps1"
+    Add-Content -Path $SparseFile -Value "start_server.sh"
+    Add-Content -Path $SparseFile -Value "mount_server.ps1"
+    Add-Content -Path $SparseFile -Value "mount_server.sh"
     Add-Content -Path $SparseFile -Value "README.md"
     
     Write-Host "Descargando archivos del sistema..."
@@ -56,6 +58,17 @@ elseif ($Option -eq "3") {
 }
 else {
     Write-Host "Opción no válida."
+}
+
+if ($Option -eq "1" -or $Option -eq "2") {
+    $Continue = Read-Host "`n¿Desea continuar ejecutando 'mount_server.ps1'? (S/N)"
+    if ($Continue -eq "S" -or $Continue -eq "s") {
+        if (Test-Path "mount_server.ps1") {
+            & .\mount_server.ps1
+        } else {
+            Write-Host "Error: mount_server.ps1 no encontrado." -ForegroundColor Red
+        }
+    }
 }
 
 Write-Host "--- Proceso Finalizado ---" -ForegroundColor Green
