@@ -36,11 +36,11 @@ elif [ "$OPTION" == "2" ]; then
     
     echo "LMMfunction/" > .git/info/sparse-checkout
     echo "data/" >> .git/info/sparse-checkout
-    echo "start_server.ps1" >> .git/info/sparse-checkout
-    echo "start_server.sh" >> .git/info/sparse-checkout
+    echo "setup_server.ps1" >> .git/info/sparse-checkout
+    echo "setup_server.sh" >> .git/info/sparse-checkout
+    echo "README.md" >> .git/info/sparse-checkout
     echo "mount_server.ps1" >> .git/info/sparse-checkout
     echo "mount_server.sh" >> .git/info/sparse-checkout
-    echo "README.md" >> .git/info/sparse-checkout
     
     echo "Descargando archivos del sistema..."
     git fetch origin developer

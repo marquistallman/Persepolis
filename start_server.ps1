@@ -57,4 +57,15 @@ else {
     Write-Host "Opción no válida."
 }
 
+if ($Option -eq "1" -or $Option -eq "2") {
+    $Continue = Read-Host "`n¿Desea continuar ejecutando 'mount_server.ps1'? (S/N)"
+    if ($Continue -eq "S" -or $Continue -eq "s") {
+        if (Test-Path "mount_server.ps1") {
+            & .\mount_server.ps1
+        } else {
+            Write-Host "Error: mount_server.ps1 no encontrado." -ForegroundColor Red
+        }
+    }
+}
+
 Write-Host "--- Proceso Finalizado ---" -ForegroundColor Green
