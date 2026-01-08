@@ -1,8 +1,7 @@
 package com.persepolis.IA.Scraper.sitios;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,13 +18,13 @@ public class Wallhaven extends SitioBase {
     }
 
     @Override
-    public Elements obtenerElementosRelevantes(Document doc) {
+    protected Elements obtenerElementosRelevantes(Document doc) {
         return buscarPorSelectores(doc, "figure.thumb");
     }
 
     @Override
-    public Map<String, String> extraerDatos(Element elemento) {
-        Map<String, String> datos = new HashMap<>();
+    public WallpaperDTO extraerDatos(Element elemento) {
+        WallpaperDTO dto = new WallpaperDTO();
         Element linkElement = elemento.selectFirst("a.preview");
         String enlace = (linkElement != null) ? linkElement.attr("href") : "";
         if (!enlace.startsWith("http") && !enlace.isEmpty()) enlace = "https://wallhaven.cc" + (enlace.startsWith("/") ? enlace : "/" + enlace);
@@ -36,25 +35,29 @@ public class Wallhaven extends SitioBase {
         if (preview.isEmpty() && img != null) preview = img.attr("src");
         
         Element resInfo = elemento.selectFirst(".wall-res");
-        datos.put("titulo", "Wallhaven " + wallpaperId);
-        datos.put("enlace", enlace);
-        datos.put("preview", preview);
-        datos.put("resolucion", (resInfo != null) ? resInfo.text() : "");
-        datos.put("tipo", "Wallhaven");
-        return datos;
+        
+        dto.setTitulo("Wallhaven " + wallpaperId);
+        dto.setEnlace(enlace);
+        dto.setPreview(preview);
+        dto.setResolucion((resInfo != null) ? resInfo.text() : "");
+        dto.setTipo("Wallhaven");
+        return dto;
     }
     @Override
-    public Map<String, String> obtenerDetalles(String url) {
-        Map<String, String> detalles = new HashMap<>();
+    public WallpaperDTO obtenerDetalles(String url) {
+        WallpaperDTO detalles = new WallpaperDTO();
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0")
-                    .timeout(10000)
-                    .get();
+            Document doc = crearConexion(url).get();
             
             Element img = doc.selectFirst("img#wallpaper");
             if (img != null) {
-                detalles.put("fullImageUrl", img.attr("src"));
+                detalles.setFullImageUrl(img.attr("src"));
+            }
+            
+            // Extracción de Tags
+            Elements tags = doc.select("ul#tags li a.tagname");
+            for (Element tag : tags) {
+                detalles.addTag(tag.text());
             }
         } catch (Exception e) {
             System.err.println("Error obteniendo detalles de Wallhaven: " + e.getMessage());

@@ -1,8 +1,7 @@
 package com.persepolis.IA.Scraper.sitios;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -17,13 +16,13 @@ public class Peakpx extends SitioBase {
     }
 
     @Override
-    public Elements obtenerElementosRelevantes(Document doc) {
+    protected Elements obtenerElementosRelevantes(Document doc) {
         return buscarPorSelectores(doc, "#search-list li");
     }
 
     @Override
-    public Map<String, String> extraerDatos(Element elemento) {
-        Map<String, String> datos = new HashMap<>();
+    public WallpaperDTO extraerDatos(Element elemento) {
+        WallpaperDTO dto = new WallpaperDTO();
         Element link = elemento.selectFirst("a[itemprop='url']");
         String enlace = (link != null) ? link.attr("href") : "";
         if (!enlace.startsWith("http") && !enlace.isEmpty()) enlace = "https://www.peakpx.com" + enlace;
@@ -31,11 +30,11 @@ public class Peakpx extends SitioBase {
         String preview = (img != null) ? (img.hasAttr("data-src") ? img.attr("data-src") : img.attr("src")) : "";
         Element caption = elemento.selectFirst("figcaption");
         Element resSpan = elemento.selectFirst("span.res");
-        datos.put("titulo", (caption != null) ? caption.text() : "Peakpx Wallpaper");
-        datos.put("enlace", enlace);
-        datos.put("preview", preview);
-        datos.put("resolucion", (resSpan != null) ? resSpan.text() : "");
-        datos.put("tipo", "Peakpx");
-        return datos;
+        dto.setTitulo((caption != null) ? caption.text() : "Peakpx Wallpaper");
+        dto.setEnlace(enlace);
+        dto.setPreview(preview);
+        dto.setResolucion((resSpan != null) ? resSpan.text() : "");
+        dto.setTipo("Peakpx");
+        return dto;
     }
 }

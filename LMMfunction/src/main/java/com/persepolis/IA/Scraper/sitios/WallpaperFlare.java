@@ -1,8 +1,7 @@
 package com.persepolis.IA.Scraper.sitios;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -17,13 +16,13 @@ public class WallpaperFlare extends SitioBase {
     }
 
     @Override
-    public Elements obtenerElementosRelevantes(Document doc) {
+    protected Elements obtenerElementosRelevantes(Document doc) {
         return buscarPorSelectores(doc, "a[itemprop='url']", "figure a");
     }
 
     @Override
-    public Map<String, String> extraerDatos(Element elemento) {
-        Map<String, String> datos = new HashMap<>();
+    public WallpaperDTO extraerDatos(Element elemento) {
+        WallpaperDTO dto = new WallpaperDTO();
         Element figcaption = elemento.selectFirst("figcaption");
         String titulo = (figcaption != null) ? figcaption.text() : "WallpaperFlare";
         Element link = elemento.selectFirst("a[itemprop='url']");
@@ -37,11 +36,11 @@ public class WallpaperFlare extends SitioBase {
             java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\d{3,4}x\\d{3,4}").matcher(texto);
             if (matcher.find()) resolucion = matcher.group();
         }
-        datos.put("titulo", titulo);
-        datos.put("enlace", (link != null) ? link.attr("href") : "");
-        datos.put("preview", preview);
-        datos.put("resolucion", resolucion);
-        datos.put("tipo", "WallpaperFlare");
-        return datos;
+        dto.setTitulo(titulo);
+        dto.setEnlace((link != null) ? link.attr("href") : "");
+        dto.setPreview(preview);
+        dto.setResolucion(resolucion);
+        dto.setTipo("WallpaperFlare");
+        return dto;
     }
 }

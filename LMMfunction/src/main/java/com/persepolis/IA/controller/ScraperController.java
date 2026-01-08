@@ -1,5 +1,6 @@
 package com.persepolis.IA.controller;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import com.persepolis.IA.services.ScraperService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -7,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen (necesario para conectar con el Front)
@@ -20,12 +20,12 @@ public class ScraperController {
     }
 
     @GetMapping(value = "/scraper", produces = "application/json")
-    public List<Map<String, String>> buscar(@RequestParam(name = "q", defaultValue = "anime") String query) {
+    public List<WallpaperDTO> buscar(@RequestParam(name = "q", defaultValue = "anime") String query) {
         return scraperService.searchWallpapers(query);
     }
 
     @GetMapping(value = "/scraper/details", produces = "application/json")
-    public Map<String, String> obtenerDetalles(@RequestParam String url, @RequestParam String site) {
+    public WallpaperDTO obtenerDetalles(@RequestParam String url, @RequestParam String site) {
         return scraperService.getWallpaperDetails(url, site);
     }
 

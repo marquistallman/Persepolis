@@ -1,8 +1,7 @@
 package com.persepolis.IA.Scraper.sitios;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -17,13 +16,13 @@ public class Artvee extends SitioBase {
     }
 
     @Override
-    public Elements obtenerElementosRelevantes(Document doc) {
+    protected Elements obtenerElementosRelevantes(Document doc) {
         return buscarPorSelectores(doc, "div.product-grid-item");
     }
 
     @Override
-    public Map<String, String> extraerDatos(Element elemento) {
-        Map<String, String> datos = new HashMap<>();
+    public WallpaperDTO extraerDatos(Element elemento) {
+        WallpaperDTO dto = new WallpaperDTO();
         Element titleElement = elemento.selectFirst("h3.product-title a");
         Element img = elemento.selectFirst(".product-element-top img");
         String resolucion = "";
@@ -32,11 +31,11 @@ public class Artvee extends SitioBase {
             java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"hdlimagesize\":\"([^\"]+)\"").matcher(dataDiv.attr("data-sk"));
             if (m.find()) resolucion = m.group(1);
         }
-        datos.put("titulo", (titleElement != null) ? titleElement.text().trim() : "Artvee Artwork");
-        datos.put("enlace", (titleElement != null) ? titleElement.attr("href") : "");
-        datos.put("preview", (img != null) ? img.attr("src") : "");
-        datos.put("resolucion", resolucion);
-        datos.put("tipo", "Artvee");
-        return datos;
+        dto.setTitulo((titleElement != null) ? titleElement.text().trim() : "Artvee Artwork");
+        dto.setEnlace((titleElement != null) ? titleElement.attr("href") : "");
+        dto.setPreview((img != null) ? img.attr("src") : "");
+        dto.setResolucion(resolucion);
+        dto.setTipo("Artvee");
+        return dto;
     }
 }

@@ -1,5 +1,6 @@
 package com.persepolis.IA.services;
 
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import com.persepolis.IA.model.WallpaperItem;
 import com.persepolis.IA.repository.WallpaperRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -43,14 +44,14 @@ public class WallpaperService {
         // Si la BD está vacía, hacer scraping in-process, guardar resultados y devolverlos
         if (dbResults.isEmpty()) {
             try {
-                List<java.util.Map<String, String>> scraped = scraperService.searchWallpapers(query);
+                List<WallpaperDTO> scraped = scraperService.searchWallpapers(query);
                 System.out.println("--- DEBUG: DB vacía, scraper in-process devolvió " + scraped.size() + " items ---");
                 if (!scraped.isEmpty()) {
                     List<WallpaperItem> savedItems = new ArrayList<>();
-                    for (java.util.Map<String, String> map : scraped) {
+                    for (WallpaperDTO dto : scraped) {
                         try {
-                            String jsonContent = mapper.writeValueAsString(map);
-                            String url = (String) map.getOrDefault("enlace", map.getOrDefault("url", String.valueOf(jsonContent.hashCode())));
+                            String jsonContent = mapper.writeValueAsString(dto);
+                            String url = dto.getEnlace();
                             WallpaperItem saved = saveScraperResult(jsonContent, url);
                             if (saved != null) savedItems.add(saved); else System.out.println("Nota: saveScraperResult devolvió null para url=" + url);
                         } catch (Exception ex) {
@@ -102,12 +103,12 @@ public class WallpaperService {
                 System.out.println("--- DEBUG: El scraper devolvió respuesta vacía ---");
                 // Fallback: intentar ejecutar el scraper localmente (in-process)
                 try {
-                    List<java.util.Map<String, String>> fallback = scraperService.searchWallpapers(query);
+                    List<WallpaperDTO> fallback = scraperService.searchWallpapers(query);
                     System.out.println("--- DEBUG: Fallback in-process devolvió " + fallback.size() + " items ---");
-                    return fallback.stream().map(map -> {
+                    return fallback.stream().map(dto -> {
                         try {
-                            String jsonContent = mapper.writeValueAsString(map);
-                            String url = (String) map.getOrDefault("enlace", map.getOrDefault("url", String.valueOf(jsonContent.hashCode())));
+                            String jsonContent = mapper.writeValueAsString(dto);
+                            String url = dto.getEnlace();
                             return new WallpaperItem(jsonContent, url);
                         } catch (Exception ex) {
                             return null;
@@ -125,12 +126,12 @@ public class WallpaperService {
             // Si la respuesta HTTP está vacía de items, también intentamos el fallback in-process
             if (rawItems.isEmpty()) {
                 try {
-                    List<java.util.Map<String, String>> fallback = scraperService.searchWallpapers(query);
+                    List<WallpaperDTO> fallback = scraperService.searchWallpapers(query);
                     System.out.println("--- DEBUG: Fallback in-process devolvió " + fallback.size() + " items ---");
-                    return fallback.stream().map(map -> {
+                    return fallback.stream().map(dto -> {
                         try {
-                            String jsonContent = mapper.writeValueAsString(map);
-                            String url = (String) map.getOrDefault("enlace", map.getOrDefault("url", String.valueOf(jsonContent.hashCode())));
+                            String jsonContent = mapper.writeValueAsString(dto);
+                            String url = dto.getEnlace();
                             return new WallpaperItem(jsonContent, url);
                         } catch (Exception ex) {
                             return null;
@@ -156,12 +157,12 @@ public class WallpaperService {
             System.out.println("Nota: No se pudo obtener datos del scraper (/scraper): " + e.getMessage());
             // Intentar fallback in-process en caso de excepción
             try {
-                List<java.util.Map<String, String>> fallback = scraperService.searchWallpapers(query);
+                List<WallpaperDTO> fallback = scraperService.searchWallpapers(query);
                 System.out.println("--- DEBUG: Fallback in-process devolvió " + fallback.size() + " items (después de excepción) ---");
-                return fallback.stream().map(map -> {
+                return fallback.stream().map(dto -> {
                     try {
-                        String jsonContent = mapper.writeValueAsString(map);
-                        String url = (String) map.getOrDefault("enlace", map.getOrDefault("url", String.valueOf(jsonContent.hashCode())));
+                        String jsonContent = mapper.writeValueAsString(dto);
+                        String url = dto.getEnlace();
                         return new WallpaperItem(jsonContent, url);
                     } catch (Exception ex) {
                         return null;

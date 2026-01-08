@@ -1,7 +1,9 @@
 package com.persepolis.IA.Scraper.sitios;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.persepolis.IA.Scraper.model.WallpaperDTO;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,19 +11,50 @@ import org.jsoup.select.Elements;
 
 public abstract class SitioBase {
     
+    // Rotación de User-Agents para evitar bloqueos
+    private static final String[] USER_AGENTS = {
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0"
+    };
+    
     public abstract String getNombre();
     public abstract String generarUrlBusqueda(String query) throws Exception;
-    public abstract Elements obtenerElementosRelevantes(Document doc);
-    public abstract Map<String, String> extraerDatos(Element elemento);
+    protected abstract Elements obtenerElementosRelevantes(Document doc);
+    public abstract WallpaperDTO extraerDatos(Element elemento);
     
-    // Implementación por defecto para sitios que no requieren scraping profundo
-    public Map<String, String> obtenerDetalles(String url) {
-        return new HashMap<>();
+    // Método principal que orquesta la búsqueda y gestiona la memoria
+    public List<WallpaperDTO> buscar(String query) {
+        List<WallpaperDTO> resultados = new ArrayList<>();
+        try {
+            String url = generarUrlBusqueda(query);
+            // El Document solo vive dentro de este bloque try
+            Document doc = crearConexion(url).get();
+            Elements elementos = obtenerElementosRelevantes(doc);
+            
+            for (Element elemento : elementos) {
+                try {
+                    WallpaperDTO dto = extraerDatos(elemento);
+                    if (dto != null) {
+                        resultados.add(dto);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error procesando elemento en " + getNombre() + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error en búsqueda " + getNombre() + ": " + e.getMessage());
+        }
+        return resultados;
+    }
+
+    public WallpaperDTO obtenerDetalles(String url) {
+        return new WallpaperDTO();
     }
 
     protected Connection crearConexion(String url) {
         return org.jsoup.Jsoup.connect(url)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .userAgent(USER_AGENTS[new Random().nextInt(USER_AGENTS.length)])
                 .referrer("https://www.google.com/")
                 .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
                 .header("Accept-Language", "en-US,en;q=0.9")
