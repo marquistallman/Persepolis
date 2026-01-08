@@ -34,8 +34,17 @@ if ($Mode -eq "1") {
 
 # 5. Descargar contenido
 Write-Host "Sincronizando con rama '$Branch'..."
-git pull origin $Branch
-git checkout $Branch
+
+# Usamos fetch para descargar sin fusionar todavía
+git fetch origin $Branch
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR CRÍTICO: La rama '$Branch' no existe o no se pudo acceder." -ForegroundColor Red
+    exit
+}
+
+# Forzamos que el directorio local sea IDÉNTICO a la rama remota
+# -B crea o resetea la rama local para que apunte exactamente a origin/$Branch
+git checkout -f -B $Branch origin/$Branch
 
 # Limpieza extra para Modo Servidor: Borrar archivos no rastreados (basura)
 if ($Mode -eq "1") {
