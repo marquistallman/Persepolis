@@ -6,6 +6,8 @@
      - Implementar la sección de "Populares" en el inicio (actualmente carga una búsqueda por defecto o nada).
 
 2. Prioridad MEDIA (Completar Scrapers)
+   * Hacer funcionar el boton loadmore:
+     -al dar load more debe scrapearse en las paginas siguientes de las webs
    * Extracción de Tags (Faltantes):
      - Wallhaven (en lista de búsqueda), WallpaperFlare, Peakpx, MotionBackgrounds, WallpaperAbyss, WallpaperWaves.
    * Validación de Datos:

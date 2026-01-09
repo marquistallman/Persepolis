@@ -2,7 +2,6 @@ package com.persepolis.IA.Scraper.sitios;
 
 import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;

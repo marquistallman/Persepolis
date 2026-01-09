@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,17 +33,20 @@ public class WallpaperService {
     }
 
     // Método principal de búsqueda
-    public List<WallpaperItem> searchAndMerge(String query) {
-        // 1. Buscar en Base de Datos
-        List<WallpaperItem> dbResults = repository.findByHtmlContentContainingIgnoreCase(query);
+    public List<WallpaperItem> searchAndMerge(String query, int page) {
+        List<WallpaperItem> dbResults = new ArrayList<>();
 
-        // 2. Ordenar DESCENDENTE por puntos (Más populares primero)
-        dbResults.sort((a, b) -> Integer.compare(b.getTotalScore(), a.getTotalScore()));
+        // 1. Buscar en Base de Datos (Solo si es la primera página para mostrar populares/historial)
+        if (page == 1) {
+            dbResults = repository.findByHtmlContentContainingIgnoreCase(query);
+            // 2. Ordenar DESCENDENTE por puntos (Más populares primero)
+            dbResults.sort((a, b) -> Integer.compare(b.getTotalScore(), a.getTotalScore()));
+        }
 
         // Si la BD está vacía, hacer scraping in-process, guardar resultados y devolverlos
-        if (dbResults.isEmpty()) {
+        if (page == 1 && dbResults.isEmpty()) {
             try {
-                List<WallpaperDTO> scraped = scraperService.searchWallpapers(query);
+                List<WallpaperDTO> scraped = scraperService.searchWallpapers(query, page);
                 System.out.println("--- DEBUG: DB vacía, scraper in-process devolvió " + scraped.size() + " items ---");
                 if (!scraped.isEmpty()) {
                     List<WallpaperItem> savedItems = new ArrayList<>();
@@ -72,29 +74,35 @@ public class WallpaperService {
         }
 
         // 3. Obtener resultados del Scraper
-        List<WallpaperItem> scraperResults = callYourScraper(query);
+        List<WallpaperItem> scraperResults = callYourScraper(query, page);
 
         // 4. Filtrar Scraper: Si ya está en DB, no lo incluimos de nuevo
-        // Usamos un Set de URLs de la DB para búsqueda rápida
-        Set<String> dbUrls = dbResults.stream()
-                .map(WallpaperItem::getUrl)
-                .collect(Collectors.toSet());
+        if (page == 1) {
+            // Usamos un Set de URLs de la DB para búsqueda rápida
+            Set<String> dbUrls = dbResults.stream()
+                    .map(WallpaperItem::getUrl)
+                    .collect(Collectors.toSet());
 
-        List<WallpaperItem> newScraperResults = scraperResults.stream()
-                .filter(item -> !dbUrls.contains(item.getUrl()))
-                .toList();
+            List<WallpaperItem> newScraperResults = scraperResults.stream()
+                    .filter(item -> !dbUrls.contains(item.getUrl()))
+                    .toList();
 
-        // 5. Combinar: Primero DB, luego Scraper nuevos
-        List<WallpaperItem> finalResults = new ArrayList<>(dbResults);
-        finalResults.addAll(newScraperResults);
-
-        return finalResults;
+            // 5. Combinar: Primero DB, luego Scraper nuevos
+            List<WallpaperItem> finalResults = new ArrayList<>(dbResults);
+            finalResults.addAll(newScraperResults);
+            return finalResults;
+        } else {
+            // Para páginas siguientes, devolvemos lo del scraper, pero verificamos si ya existen en BD para mantener stats
+            return scraperResults.stream()
+                    .map(item -> repository.findByUrl(item.getUrl()).orElse(item))
+                    .collect(Collectors.toList());
+        }
     }
 
-    private List<WallpaperItem> callYourScraper(String query) {
+    private List<WallpaperItem> callYourScraper(String query, int page) {
         try {
             String jsonResponse = webClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/scraper").queryParam("q", query).build())
+                    .uri(uriBuilder -> uriBuilder.path("/scraper").queryParam("q", query).queryParam("page", page).build())
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
@@ -103,7 +111,7 @@ public class WallpaperService {
                 System.out.println("--- DEBUG: El scraper devolvió respuesta vacía ---");
                 // Fallback: intentar ejecutar el scraper localmente (in-process)
                 try {
-                    List<WallpaperDTO> fallback = scraperService.searchWallpapers(query);
+                    List<WallpaperDTO> fallback = scraperService.searchWallpapers(query, page);
                     System.out.println("--- DEBUG: Fallback in-process devolvió " + fallback.size() + " items ---");
                     return fallback.stream().map(dto -> {
                         try {
@@ -126,7 +134,7 @@ public class WallpaperService {
             // Si la respuesta HTTP está vacía de items, también intentamos el fallback in-process
             if (rawItems.isEmpty()) {
                 try {
-                    List<WallpaperDTO> fallback = scraperService.searchWallpapers(query);
+                    List<WallpaperDTO> fallback = scraperService.searchWallpapers(query, page);
                     System.out.println("--- DEBUG: Fallback in-process devolvió " + fallback.size() + " items ---");
                     return fallback.stream().map(dto -> {
                         try {
@@ -157,7 +165,7 @@ public class WallpaperService {
             System.out.println("Nota: No se pudo obtener datos del scraper (/scraper): " + e.getMessage());
             // Intentar fallback in-process en caso de excepción
             try {
-                List<WallpaperDTO> fallback = scraperService.searchWallpapers(query);
+                List<WallpaperDTO> fallback = scraperService.searchWallpapers(query, page);
                 System.out.println("--- DEBUG: Fallback in-process devolvió " + fallback.size() + " items (después de excepción) ---");
                 return fallback.stream().map(dto -> {
                     try {

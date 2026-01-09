@@ -219,21 +219,26 @@ const BrowseModule = {
         this.triggerSearch();
     },
 
-    async fetchWallpapers(query) {
+    async fetchWallpapers(query, append = false) {
         // Loading state
-        this.dom.grid.innerHTML = `
-            <div class="col-span-full flex justify-center py-12">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
-            </div>`;
+        if (!append) {
+            this.state.currentPage = 1;
+            this.dom.grid.innerHTML = `
+                <div class="col-span-full flex justify-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+                </div>`;
+        }
 
         try {
             // Conexión al endpoint del backend
-            const response = await fetch(`/api/wallpapers/search?query=${encodeURIComponent(query)}`);
+            const response = await fetch(`/api/wallpapers/search?query=${encodeURIComponent(query)}&page=${this.state.currentPage}`);
             
             if (!response.ok) {
                 console.warn("Backend not reachable");
-                this.state.wallpapers = [];
-                this.render();
+                if (!append) {
+                    this.state.wallpapers = [];
+                    this.render();
+                }
                 return;
             }
 
@@ -242,13 +247,15 @@ const BrowseModule = {
 
             if (!Array.isArray(data)) {
                 console.error("Error: Se esperaba un array pero se recibió:", data);
-                this.state.wallpapers = [];
-                this.render();
+                if (!append) {
+                    this.state.wallpapers = [];
+                    this.render();
+                }
                 return;
             }
 
             // Mapeo de datos desde WallpaperItem (Backend)
-            this.state.wallpapers = data.map((item) => {
+            const newWallpapers = data.map((item) => {
                 // Intentamos parsear el contenido guardado (asumiendo que es el JSON del scraper)
                 let props = {};
                 try {
@@ -274,7 +281,13 @@ const BrowseModule = {
                 };
             });
 
-            this.render();
+            if (append) {
+                this.state.wallpapers = [...this.state.wallpapers, ...newWallpapers];
+                this.render(newWallpapers);
+            } else {
+                this.state.wallpapers = newWallpapers;
+                this.render();
+            }
 
         } catch (error) {
             console.error('Error fetching wallpapers:', error);
@@ -335,8 +348,11 @@ const BrowseModule = {
         return div;
     },
 
-    render() {
-        this.dom.grid.innerHTML = '';
+    render(itemsToRender = null) {
+        if (!itemsToRender) {
+            this.dom.grid.innerHTML = '';
+            itemsToRender = this.state.wallpapers;
+        }
         
         if (this.state.wallpapers.length === 0) {
             this.dom.grid.innerHTML = `
@@ -347,7 +363,7 @@ const BrowseModule = {
             return;
         }
 
-        this.state.wallpapers.forEach(wp => {
+        itemsToRender.forEach(wp => {
             this.dom.grid.appendChild(this.createWallpaperCard(wp));
         });
         

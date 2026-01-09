@@ -17,8 +17,8 @@ public class WallpaperController {
     private WallpaperService service;
 
     @GetMapping("/search")
-    public List<WallpaperItem> search(@RequestParam String query) {
-        return service.searchAndMerge(query);
+    public List<WallpaperItem> search(@RequestParam String query, @RequestParam(defaultValue = "1") int page) {
+        return service.searchAndMerge(query, page);
     }
 
     @PostMapping("/interact")
