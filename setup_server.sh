@@ -10,7 +10,7 @@ echo -e "\nSelecciona el modo de instalación:"
 echo "1. Servidor (Producción) -> Rama 'server' (Descarga ligera)"
 echo "2. Desarrollo (Local)    -> Rama 'developer' (Descarga completa)"
 read -p "Opción (1 o 2): " MODE
-
+git config core.filemode false
 # 3. Inicializar Git
 if [ ! -d ".git" ]; then
     echo "Inicializando repositorio Git..."
