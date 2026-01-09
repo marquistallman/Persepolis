@@ -11,8 +11,15 @@ public class Artvee extends SitioBase {
     public String getNombre() { return "Artvee"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        if (page > 1) return "https://artvee.com/main/page/" + page + "/?s=" + URLEncoder.encode(query, "UTF-8");
         return "https://artvee.com/main/?s=" + URLEncoder.encode(query, "UTF-8");
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        if (page > 1) return "https://artvee.com/page/" + page + "/";
+        return "https://artvee.com/";
     }
 
     @Override
@@ -35,7 +42,37 @@ public class Artvee extends SitioBase {
         dto.setEnlace((titleElement != null) ? titleElement.attr("href") : "");
         dto.setPreview((img != null) ? img.attr("src") : "");
         dto.setResolucion(resolucion);
+        
+        // Extracción de Tags (Categorías)
+        Elements catTags = elemento.select(".woodmart-product-cats a");
+        for (Element tag : catTags) {
+            dto.addTag(tag.text());
+        }
+        
+        // Extracción de Artista (lo añadimos como tag para facilitar la búsqueda)
+        Element artist = elemento.selectFirst(".woodmart-product-brands-links a");
+        if (artist != null) {
+            dto.addTag(artist.text());
+        }
+        
         dto.setTipo("Artvee");
         return dto;
+    }
+
+    @Override
+    public WallpaperDTO obtenerDetalles(String url) {
+        WallpaperDTO detalles = new WallpaperDTO();
+        try {
+            Document doc = crearConexion(url).get();
+            Element img = doc.selectFirst(".product-image-summary img");
+            if (img != null) {
+                detalles.setFullImageUrl(img.attr("src"));
+            }
+
+            
+        } catch (Exception e) {
+            System.err.println("Error obteniendo detalles de Artvee: " + e.getMessage());
+        }
+        return detalles;
     }
 }

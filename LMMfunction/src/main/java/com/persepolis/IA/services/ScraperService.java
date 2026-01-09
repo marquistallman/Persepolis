@@ -7,11 +7,11 @@ import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import com.persepolis.IA.model.WebCache;
 import com.persepolis.IA.repository.WebCacheRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service("iaScraperService")
@@ -28,8 +28,12 @@ public class ScraperService {
     }
 
     public List<WallpaperDTO> searchWallpapers(String query) {
+        return searchWallpapers(query, 1);
+    }
+
+    public List<WallpaperDTO> searchWallpapers(String query, int page) {
         String normalizedQuery = query.trim().toLowerCase();
-        String cacheKey = "search:" + normalizedQuery;
+        String cacheKey = "search:" + normalizedQuery + ":" + page;
 
         Optional<WebCache> cached = webCacheRepository.findByCacheKey(cacheKey);
 
@@ -45,7 +49,7 @@ public class ScraperService {
         try {
             System.out.println("--- Realizando búsqueda REAL para: " + query);
             CScrap scraper = new CScrap();
-            List<WallpaperDTO> results = scraper.buscarWeb(normalizedQuery);
+            List<WallpaperDTO> results = scraper.buscarWeb(normalizedQuery, page);
             
             // DEBUG: log cantidad antes de guardar
             System.out.println("--- DEBUG: Scraper encontró (antes guardar) " + results.size() + " items ---");
@@ -108,6 +112,26 @@ public class ScraperService {
             System.err.println("--- ERROR en ScraperService (Detalles): " + e.getMessage());
             e.printStackTrace();
             return new WallpaperDTO();
+        }
+    }
+
+    // --- GESTIÓN DE MEMORIA Y DISCO ---
+    // Ejecutar cada 24 horas para limpiar caché antiguo de la base de datos
+    @Scheduled(fixedRate = 86400000)
+    public void evictOldCache() {
+        try {
+            System.out.println("--- MANTENIMIENTO: Iniciando limpieza de caché antiguo...");
+            List<WebCache> allItems = webCacheRepository.findAll();
+            List<WebCache> toDelete = allItems.stream()
+                .filter(item -> ChronoUnit.DAYS.between(item.getLastUpdated(), LocalDateTime.now()) > DETAILS_CACHE_DAYS + 1)
+                .toList();
+            
+            if (!toDelete.isEmpty()) {
+                webCacheRepository.deleteAll(toDelete);
+                System.out.println("--- MANTENIMIENTO: Eliminados " + toDelete.size() + " registros antiguos.");
+            }
+        } catch (Exception e) {
+            System.err.println("--- ERROR en limpieza de caché: " + e.getMessage());
         }
     }
 

@@ -20,8 +20,8 @@ public class ScraperController {
     }
 
     @GetMapping(value = "/scraper", produces = "application/json")
-    public List<WallpaperDTO> buscar(@RequestParam(name = "q", defaultValue = "anime") String query) {
-        return scraperService.searchWallpapers(query);
+    public List<WallpaperDTO> buscar(@RequestParam(name = "q", defaultValue = "anime") String query, @RequestParam(name = "page", defaultValue = "1") int page) {
+        return scraperService.searchWallpapers(query, page);
     }
 
     @GetMapping(value = "/scraper/details", produces = "application/json")

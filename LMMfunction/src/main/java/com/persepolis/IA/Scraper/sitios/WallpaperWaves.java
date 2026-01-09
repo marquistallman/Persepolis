@@ -2,7 +2,6 @@ package com.persepolis.IA.Scraper.sitios;
 
 import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -12,8 +11,15 @@ public class WallpaperWaves extends SitioBase {
     public String getNombre() { return "Wallpaper Waves"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        if (page > 1) return "https://wallpaperwaves.com/page/" + page + "/?s=" + URLEncoder.encode(query, "UTF-8");
         return "https://wallpaperwaves.com/?s=" + URLEncoder.encode(query, "UTF-8");
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        if (page > 1) return "https://wallpaperwaves.com/page/" + page + "/";
+        return "https://wallpaperwaves.com/";
     }
 
     @Override

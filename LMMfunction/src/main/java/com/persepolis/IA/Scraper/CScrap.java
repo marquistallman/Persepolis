@@ -47,7 +47,7 @@ public class CScrap {
             try {
                 System.out.println("Buscando en " + sitio.getNombre() + "...");
                 // Delegamos la búsqueda y gestión de memoria a la clase base
-                List<WallpaperDTO> resultados = sitio.buscar(busqueda);
+                List<WallpaperDTO> resultados = sitio.buscar(busqueda, 1);
                 System.out.println("  Encontrados: " + resultados.size());
                 
                 for (WallpaperDTO dto : resultados) {
@@ -76,12 +76,16 @@ public class CScrap {
      * Método optimizado para uso Web/API que retorna una lista de datos.
      */
     public List<WallpaperDTO> buscarWeb(String busqueda) {
+        return buscarWeb(busqueda, 1);
+    }
+
+    public List<WallpaperDTO> buscarWeb(String busqueda, int page) {
         List<WallpaperDTO> resultados = new ArrayList<>();
         
         for (SitioBase sitio : sitios) {
             try {
                 System.out.println("--- Scraping site: " + sitio.getNombre());
-                List<WallpaperDTO> encontrados = sitio.buscar(busqueda);
+                List<WallpaperDTO> encontrados = sitio.buscar(busqueda, page);
                 resultados.addAll(encontrados);
             } catch (Exception e) {
                 System.out.println("Error scraping web " + sitio.getNombre() + ": " + e.getMessage());

@@ -1,31 +1,20 @@
-📋 Reporte de Revisión del Proyecto
-1. Prioridad CRÍTICA (Afecta la viabilidad del producto)
-Sistema de Tags Inexistente vs. Lógica del Chat:
+📋 Lista de Tareas Pendientes (To-Do)
 
-El Problema: Tu archivo chat_data.json tiene una lógica compleja de decisión basada en keywords (anime, cyberpunk, nature). Sin embargo, tus scrapers (ej. Wallhaven.java) no están extrayendo tags. Solo extraen titulo, enlace, preview.
-La Limitación Técnica: El método extraerDatos devuelve Map<String, String>. Un Map de Strings no puede almacenar una lista de etiquetas de forma eficiente (tendrías que guardarlas como "tag1, tag2, tag3" y luego separarlas, lo cual es lento y propenso a errores).
-Consecuencia: El chatbot no encontrará imágenes precisas porque la base de datos carecerá de la metadata necesaria para filtrar por las opciones del menú.
-Fuga de Memoria en Jsoup (Memory Leak):
+1. Prioridad ALTA (Frontend y Experiencia de Usuario)
+   * Ventana Principal (Home):
+     - Arreglar la disposición visual de la ventana principal.
+     - Implementar la sección de "Populares" en el inicio (actualmente carga una búsqueda por defecto o nada).
 
-El Problema: En SitioBase, el método obtenerElementosRelevantes devuelve un objeto Elements de Jsoup.
-Por qué es grave: En Jsoup, un objeto Element mantiene una referencia oculta a todo el documento HTML original. Si tu servicio principal obtiene una lista de 100 elementos para procesarlos después, estás manteniendo en memoria el código HTML completo de 100 páginas web. Esto causará un OutOfMemoryError rápidamente.
-Solución: Los datos deben extraerse inmediatamente y el objeto Document debe ser descartado antes de pasar los datos a la siguiente capa.
-2. Prioridad ALTA (Riesgo de Bloqueo y Estabilidad)
-Huella Digital Estática (Anti-Scraping):
+2. Prioridad MEDIA (Completar Scrapers)
+   * Hacer funcionar el boton loadmore:
+     -al dar load more debe scrapearse en las paginas siguientes de las webs
+   * Extracción de Tags (Faltantes):
+     - Wallhaven (en lista de búsqueda), WallpaperFlare, Peakpx, MotionBackgrounds, WallpaperAbyss, WallpaperWaves.
+   * Validación de Datos:
+     - Asegurar que no se guarden wallpapers con imágenes rotas o URLs vacías.
 
-El Problema: En SitioBase.java, el User-Agent y los headers están "hardcoded" (fijos).
-Riesgo: Sitios como Wallhaven o Artvee tienen protección. Si haces 50 peticiones seguidas con exactamente el mismo User-Agent y headers, bloquearán tu IP.
-Solución: Necesitas rotación de User-Agent y, idealmente, un sistema de "backoff" (esperar unos segundos aleatorios entre peticiones).
-Manejo de Errores Silencioso:
-
-El Problema: SitioBase usa .ignoreHttpErrors(true).
-Riesgo: Si un sitio devuelve error 500 o 404, Jsoup intentará parsear la página de error como si fuera una galería. Esto llenará tu base de datos de basura o lanzará excepciones de parseo difíciles de depurar.
-3. Prioridad MEDIA (Escalabilidad y Base de Datos)
-Base de Datos H2 en Archivo:
-
-El Problema: Estás usando H2 (jdbc:h2:file:./data/wallpaperdb). Aunque es persistente, H2 carga gran parte de los índices en memoria.
-Riesgo: Si planeas tener miles de wallpapers, el consumo de RAM subirá drásticamente. Además, H2 no maneja bien la concurrencia si intentas hacer scraping en múltiples hilos (threads) a la vez.
-Sugerencia: Para producción o datasets grandes, considera SQLite (mejor manejo de archivo único) o PostgreSQL (si usas Docker).
-Falta de Validación de Datos:
-
-El Problema: En Wallhaven.java, si preview viene vacío, intentas recuperarlo de src, pero no hay garantía de que la URL sea válida. Guardar URLs rotas o relativas (/wallpapers/img1.jpg sin el dominio) romperá el frontend.
+3. Prioridad MEDIA (Estabilidad y Anti-Bloqueo)
+   * Mejorar Anti-Scraping:
+     - Implementar "Backoff" (esperas aleatorias entre peticiones) para complementar la rotación de User-Agents.
+   * Manejo de Errores HTTP:
+     - Eliminar .ignoreHttpErrors(true) de SitioBase y manejar códigos 404/500 correctamente.

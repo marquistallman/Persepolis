@@ -2,7 +2,6 @@ package com.persepolis.IA.Scraper.sitios;
 
 import com.persepolis.IA.Scraper.model.WallpaperDTO;
 import java.net.URLEncoder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -12,8 +11,15 @@ public class MoeWalls extends SitioBase {
     public String getNombre() { return "Moe Walls"; }
 
     @Override
-    public String generarUrlBusqueda(String query) throws Exception {
+    public String generarUrlBusqueda(String query, int page) throws Exception {
+        if (page > 1) return "https://moewalls.com/page/" + page + "/?s=" + URLEncoder.encode(query, "UTF-8");
         return "https://moewalls.com/?s=" + URLEncoder.encode(query, "UTF-8");
+    }
+
+    @Override
+    public String getUrlPopulares(int page) {
+        if (page > 1) return "https://moewalls.com/page/" + page + "/";
+        return "https://moewalls.com/";
     }
 
     @Override
@@ -33,6 +39,15 @@ public class MoeWalls extends SitioBase {
         
         Element resElement = elemento.selectFirst(".entry-resolutions a");
         dto.setResolucion((resElement != null) ? resElement.text() : "");
+        
+        // Extracción de Tags desde las clases CSS (ej: tag-anime, category-movies)
+        for (String className : elemento.classNames()) {
+            if (className.startsWith("tag-")) {
+                dto.addTag(className.substring(4).replace("-", " "));
+            } else if (className.startsWith("category-")) {
+                dto.addTag(className.substring(9).replace("-", " "));
+            }
+        }
         
         dto.setTipo("Moe Walls");
         dto.setHasVideo(true);

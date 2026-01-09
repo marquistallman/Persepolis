@@ -3,7 +3,6 @@ package com.persepolis.IA.controller;
 import com.persepolis.IA.ChatService;
 import com.persepolis.IA.dto.Message;
 import com.persepolis.IA.services.OpenRouterService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
