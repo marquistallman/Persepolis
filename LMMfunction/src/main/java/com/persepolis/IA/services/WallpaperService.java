@@ -28,7 +28,7 @@ public class WallpaperService {
     private ScraperService scraperService; // Fallback para ejecutar el scraper in-process si la llamada HTTP falla
 
     public WallpaperService() {
-        this.webClient = WebClient.create("http://localhost:8080");
+        this.webClient = WebClient.create("http://127.0.0.1:8080");
         this.mapper = new ObjectMapper();
     }
 
