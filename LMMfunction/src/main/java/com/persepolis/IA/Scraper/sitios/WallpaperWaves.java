@@ -46,6 +46,7 @@ public class WallpaperWaves extends SitioBase {
         try {
             Document doc = crearConexion(url).get();
 
+            // Selector exacto de la versión funcional
             Element videoSource = doc.selectFirst("div.player_responsive video source");
             if (videoSource != null) {
                 detalles.setVideoUrl(videoSource.attr("src"));

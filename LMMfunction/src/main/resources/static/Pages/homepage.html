@@ -145,7 +145,22 @@
 
     <!-- Trending Section -->
     <section class="py-20 bg-background-light">
-        
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="font-headline text-4xl md:text-5xl mb-4">Trending Now</h2>
+                    <p class="text-text-secondary text-lg">Most downloaded wallpapers this week</p>
+                </div>
+                <a href="browse.html?q=popular" class="btn-outline hidden md:flex items-center gap-2">
+                    View All
+                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c8eb8633-1765284080467.png" alt="Arrow" class="w-4 h-4">
+                </a>
+            </div>
+            
+            <div id="trendingGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Dynamic Content will be loaded here by homepage.js -->
+            </div>
+        </div>
     </section>
 
     <!-- Categories Quick Access -->
@@ -279,6 +294,30 @@
     </div>
 </footer>
 
+    <!-- Quick Preview Modal (Required for Wallpaper Cards) -->
+    <div id="previewModal" class="modal-overlay hidden items-center justify-center" style="z-index: 9999;">
+        <div class="modal-content max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="relative">
+                <button id="closeModal" class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Close preview">
+                    <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1d533db9c-1766571610545.png" alt="Close icon" class="w-6 h-6">
+                </button>
+                <img id="previewImage" src="" alt="Wallpaper preview" class="block w-auto max-w-full max-h-[60vh] mx-auto rounded-t-xl object-contain">
+                <div class="p-6 bg-background-light rounded-b-xl">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 id="previewTitle" class="font-headline text-2xl mb-2">Wallpaper Title</h3>
+                            <p class="text-text-secondary">By <span id="previewCreator" class="text-primary font-medium">Creator Name</span></p>
+                        </div>
+                        <button class="btn-accent">
+                            <img src="https://img.rocket.new/generatedImages/rocket_gen_img_146cfa0c8-1764649038136.png" alt="Download icon" class="w-5 h-5">
+                            Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="chatWindow" class="chat-window">
         <div class="chat-header">
             <span>Chat Support</span>
@@ -361,6 +400,7 @@
             });
         }
     </script>
+    <script src="homepage.js"></script>
     <script src="chat.js"></script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>

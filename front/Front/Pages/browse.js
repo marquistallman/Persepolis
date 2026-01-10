@@ -457,7 +457,8 @@ const BrowseModule = {
                     video.controls = true;
                     video.autoplay = true;
                     video.loop = true;
-                    video.muted = false;
+                    video.muted = true;
+                    video.setAttribute('playsinline', '');
                     
                     img.classList.add('hidden');
                     img.parentElement.insertBefore(video, img);
