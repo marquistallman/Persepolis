@@ -67,6 +67,12 @@ public class IaApplication {
 			if (os.contains("win")) {
 				Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
 				System.out.println("--- Navegador abierto en: " + url + " ---");
+			} else if (os.contains("mac")) {
+				Runtime.getRuntime().exec("open " + url);
+				System.out.println("--- Navegador abierto en: " + url + " ---");
+			} else if (os.contains("nix") || os.contains("nux")) {
+				Runtime.getRuntime().exec("xdg-open " + url);
+				System.out.println("--- Navegador abierto en: " + url + " ---");
 			}
 		} catch (Exception e) {
 			System.err.println("--- No se pudo abrir el navegador: " + e.getMessage() + " ---");
