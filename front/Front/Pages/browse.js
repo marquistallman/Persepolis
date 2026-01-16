@@ -298,6 +298,25 @@ const BrowseModule = {
         }
     },
 
+    createAdCard() {
+        console.log("--- DEBUG: Insertando bloque de anuncio Adsterra ---");
+        const div = document.createElement('div');
+        div.className = 'card flex items-center justify-center bg-surface min-h-[250px] w-full overflow-hidden';
+        
+        const adContainer = document.createElement('div');
+        adContainer.id = "container-9ad4fb0aa5a790e206c08973b46ab938";
+        
+        const script = document.createElement('script');
+        script.async = true;
+        script.dataset.cfasync = "false";
+        script.src = "https://pl28454217.effectivegatecpm.com/9ad4fb0aa5a790e206c08973b46ab938/invoke.js";
+        
+        div.appendChild(script);
+        div.appendChild(adContainer);
+        
+        return div;
+    },
+
     createWallpaperCard(data) {
         const div = document.createElement('div');
         div.className = 'card hover-lift group cursor-pointer wallpaper-item';
@@ -363,8 +382,12 @@ const BrowseModule = {
             return;
         }
 
-        itemsToRender.forEach(wp => {
+        itemsToRender.forEach((wp, index) => {
             this.dom.grid.appendChild(this.createWallpaperCard(wp));
+            
+            if ((index + 1) % 10 === 0) {
+                this.dom.grid.appendChild(this.createAdCard());
+            }
         });
         
         this.dom.resultsCount.textContent = this.state.wallpapers.length.toLocaleString();

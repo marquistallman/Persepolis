@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PersepolisAI</title>
+    <!-- SEO Placeholder: Estos valores serán reemplazados por Thymeleaf si mueves este archivo a /templates/home.html -->
+    <title th:text="${pageTitle} ?: 'Persepolis IA - Wallpapers'">Persepolis IA</title>
+    <meta name="description" th:content="${pageDescription} ?: 'Buscador de wallpapers con IA'">
+    <!-- SEO: Indica a los buscadores que el contenido real está en /pages/homepage.html -->
+    <link rel="canonical" href="/pages/homepage.html" />
+    
     <link rel="stylesheet" href="css/main.css">
     <style>
         body {
@@ -71,25 +76,17 @@
 <body>
     <div class="redirect-container">
         <div class="logo">PersepolisAI</div>
-        <div class="loading-text">Welcome to your wallpaper destination</div>
-        <div class="spinner"></div>
-        <div class="redirect-info">Redirecting to homepage...</div>
+        <div class="loading-text">Inteligencia Artificial para tus Wallpapers</div>
+        
+        <!-- Enlace directo en lugar de redirección JS para mejorar SEO -->
+        <a href="/pages/homepage.html" style="color: white; text-decoration: underline; font-size: 1.1rem;">Entrar al Buscador</a>
     </div>
 
     <script>
-        // Redirect to homepage after a short delay for better user experience
+        // Redirección automática a la home real
         setTimeout(function() {
-            window.location.href = 'pages/homepage.html';
-        }, 2000);
-        
-        // Fallback redirect in case the timeout doesn't work
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
-                    window.location.replace('pages/homepage.html');
-                }
-            }, 2500);
-        });
+            window.location.href = '/pages/homepage.html';
+        }, 1500);
     </script>
 <script id="dhws-dataInjector" src="/public/dhws-data-injector.js"></script>
 </body>

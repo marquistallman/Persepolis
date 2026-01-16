@@ -20,6 +20,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio principal que gestiona la lógica conversacional del asistente.
+ * Combina un árbol de decisión determinista (definido en JSON) con capacidades
+ * de LLM para refinar búsquedas cuando el flujo estándar no satisface al usuario.
+ */
 @Service
 public class ChatService {
 
@@ -44,6 +49,14 @@ public class ChatService {
     // Usamos ConcurrentHashMap para seguridad en hilos con múltiples usuarios
     private final Map<String, UserSession> sessions = new ConcurrentHashMap<>();
 
+    /**
+     * Procesa un mensaje entrante de un usuario y determina la siguiente acción.
+     * Maneja el enrutamiento entre saludos, flujo estándar (árbol) y flujo específico.
+     *
+     * @param message El texto enviado por el usuario.
+     * @param userId Identificador único de la sesión (ej. X-Session-ID).
+     * @return Un Mono que contiene la respuesta (texto y/o resultados) para el cliente.
+     */
     public Mono<Map<String, Object>> processMessage(String message, String userId) {
         if (message == null) return Mono.just(simpleResponse(""));
         String lower = message.trim().toLowerCase(Locale.ROOT);
@@ -104,6 +117,13 @@ public class ChatService {
         return Mono.just(simpleResponse(chatData.getResponse("specificStart", session.originalRequest, chatData.getDecisionTree().getRoot().getText())));
     }
 
+    /**
+     * Maneja la lógica de estado para usuarios que ya están dentro de un flujo de conversación.
+     * Navega por los nodos del árbol de decisión o gestiona la confirmación de satisfacción.
+     *
+     * @param userId ID del usuario.
+     * @param message Respuesta del usuario a la pregunta actual.
+     */
     private Mono<Map<String, Object>> processActiveSession(String userId, String message) {
         UserSession session = sessions.get(userId);
 
@@ -183,6 +203,10 @@ public class ChatService {
         }
     }
 
+    /**
+     * Utiliza el cliente de IA (LLM) para generar nuevas palabras clave de búsqueda
+     * cuando el usuario indica que no está satisfecho con los resultados anteriores.
+     */
     private Mono<String> generateAlternativeKeywordsWithLLM(UserSession session) {
         String prompt = chatData.getResponse("llmPrompt", session.originalRequest, session.lastGeneratedQuery);
         return aiClient.generate(prompt, false);
@@ -227,6 +251,13 @@ public class ChatService {
                 .collect(Collectors.joining(" "));
     }
 
+    /**
+     * Ejecuta la búsqueda de wallpapers utilizando el Scraper.
+     * Implementa lógica para combinar resultados de múltiples keywords y eliminar duplicados.
+     *
+     * @param query Palabras clave procesadas.
+     * @param originalRequest La petición original del usuario (para mensajes de UI).
+     */
     private Map<String, Object> performSearch(String query, String originalRequest) {
         Map<String, Object> response = new HashMap<>();
         try {

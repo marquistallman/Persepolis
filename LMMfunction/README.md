@@ -8,8 +8,9 @@ Para trabajar en este proyecto necesitas instalar:
 
 1.  **Java 21 (JDK)**: El motor del backend.
 2.  **Maven**: Para gestionar las librerías y compilar.
-3.  **Git Bash** (si usas Windows): Para ejecutar los scripts de automatización.
-4.  **(Opcional) Node.js**: Solo si necesitas modificar el diseño (CSS/Tailwind).
+3.  **MySQL Server**: Base de datos principal.
+4.  **Git Bash** (si usas Windows): Para ejecutar los scripts de automatización.
+5.  **(Opcional) Node.js**: Solo si necesitas modificar el diseño (CSS/Tailwind).
 
 ## ⚡ Panel de Control (Windows)
 
@@ -29,6 +30,17 @@ Si usas macOS o Linux, usa el script equivalente:
 3.  Ejecútalo: `./menu.sh`
 
 ## 🚀 Puesta en Marcha
+
+### 0. Configuración de Base de Datos (MySQL)
+Antes de iniciar, asegúrate de tener MySQL corriendo y crea la base de datos:
+
+```sql
+CREATE DATABASE wallpaperdb;
+```
+
+*Nota: La configuración por defecto espera usuario `root` y contraseña `password`. Si usas credenciales diferentes (común en Linux), puedes configurarlas en `application.properties` o usar variables de entorno:*
+- `DB_USER`
+- `DB_PASSWORD`
 
 ### 1. Configuración Inicial
 Clona el repositorio y asegúrate de estar en la carpeta `LMMfunction`.
@@ -90,9 +102,6 @@ java -jar target/IA-0.0.1-SNAPSHOT.jar
 
 ## 🛠️ Herramientas de Desarrollo
 
-- **Consola H2 (Base de Datos)**: http://localhost:8080/h2-console
-  - *User*: `sa`
-  - *Password*: `password`
 - **Test API Chat**: `http://localhost:8080/test/chat?message=Hola`
 - **Limpieza de RAM**: El sistema limpia automáticamente las sesiones inactivas cada hora.
 

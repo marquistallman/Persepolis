@@ -1413,6 +1413,10 @@ input:focus, textarea:focus, select:focus{
   max-height: 90vh;
 }
 
+.min-h-\[250px\]{
+  min-height: 250px;
+}
+
 .w-10{
   width: 2.5rem;
 }
@@ -1550,6 +1554,10 @@ input:focus, textarea:focus, select:focus{
   align-items: flex-start;
 }
 
+.items-end{
+  align-items: flex-end;
+}
+
 .items-center{
   align-items: center;
 }
@@ -1614,6 +1622,12 @@ input:focus, textarea:focus, select:focus{
 
 .overflow-y-auto{
   overflow-y: auto;
+}
+
+.truncate{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rounded{
@@ -2083,6 +2097,10 @@ input:focus, textarea:focus, select:focus{
   color: rgb(255 255 255 / 0.9);
 }
 
+.underline{
+  text-decoration-line: underline;
+}
+
 .opacity-0{
   opacity: 0;
 }
@@ -2160,6 +2178,10 @@ input:focus, textarea:focus, select:focus{
   transition-property: transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+.duration-300{
+  transition-duration: 300ms;
 }
 
 .duration-700{
@@ -2376,6 +2398,10 @@ input:focus, textarea:focus, select:focus{
 
   .md\:hidden{
     display: none;
+  }
+
+  .md\:grid-cols-2{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .md\:grid-cols-3{
