@@ -299,6 +299,7 @@ const BrowseModule = {
     },
 
     createAdCard() {
+        console.log("--- DEBUG: Insertando bloque de anuncio Adsterra ---");
         const div = document.createElement('div');
         div.className = 'card flex items-center justify-center bg-surface min-h-[250px] w-full overflow-hidden';
         

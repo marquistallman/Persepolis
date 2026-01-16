@@ -14,6 +14,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Servicio encargado de la obtención de wallpapers.
+ * Actúa como una capa de abstracción sobre el Scraper (CScrap), añadiendo
+ * persistencia y caché (WebCacheRepository) para optimizar tiempos de respuesta.
+ */
 @Service("iaScraperService")
 public class ScraperService {
 
@@ -31,6 +36,16 @@ public class ScraperService {
         return searchWallpapers(query, 1);
     }
 
+    /**
+     * Busca wallpapers por término y página.
+     * Implementa patrón "Read-Through Cache":
+     * 1. Busca en BD si existe una búsqueda reciente (< 12 horas).
+     * 2. Si no, ejecuta el scraper real y guarda el resultado.
+     *
+     * @param query Término de búsqueda.
+     * @param page Número de página.
+     * @return Lista de wallpapers encontrados.
+     */
     public List<WallpaperDTO> searchWallpapers(String query, int page) {
         String normalizedQuery = query.trim().toLowerCase();
         String cacheKey = "search:" + normalizedQuery + ":" + page;
@@ -87,6 +102,11 @@ public class ScraperService {
         }
     }
 
+    /**
+     * Obtiene los detalles de una imagen específica.
+     * Utiliza un tiempo de caché más largo (7 días) ya que los detalles de una imagen
+     * raramente cambian.
+     */
     public WallpaperDTO getWallpaperDetails(String url, String site) {
         String cacheKey = "details:" + site + ":" + url;
 
@@ -116,7 +136,10 @@ public class ScraperService {
     }
 
     // --- GESTIÓN DE MEMORIA Y DISCO ---
-    // Ejecutar cada 24 horas para limpiar caché antiguo de la base de datos
+    /**
+     * Tarea programada: Mantenimiento de la base de datos.
+     * Elimina registros de caché que tienen más de 8 días de antigüedad para liberar espacio.
+     */
     @Scheduled(fixedRate = 86400000)
     public void evictOldCache() {
         try {

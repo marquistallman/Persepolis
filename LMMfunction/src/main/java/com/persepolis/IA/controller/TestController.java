@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import org.springframework.scheduling.annotation.Scheduled;
 import reactor.core.publisher.Mono;
 
@@ -50,7 +51,7 @@ public class TestController {
     // Helper para obtener o crear el historial de un usuario específico
     private List<Message> getHistoryForUser(String sessionId) {
         SessionData session = userHistories.computeIfAbsent(sessionId, k -> {
-            List<Message> history = new CopyOnWriteArrayList<>();
+            List<Message> history = Collections.synchronizedList(new ArrayList<>());
             history.add(new Message("system", "Eres un asistente experto en wallpapers. Tus respuestas son amigables y concisas."));
             return new SessionData(history);
         });
@@ -82,6 +83,11 @@ public class TestController {
         
         List<Message> history = getHistoryForUser(sessionId);
         
+        // Protección contra colapso de memoria: Limitar tamaño del historial
+        if (history.size() > 50) {
+            history.remove(1); // Elimina el mensaje más antiguo (manteniendo el prompt del sistema en 0)
+        }
+
         // 1. Añadimos el mensaje del usuario al historial
         history.add(new Message("user", message));
 
