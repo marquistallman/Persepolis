@@ -3,6 +3,11 @@
 # Asegurar que el script se ejecuta en su propia carpeta
 cd "$(dirname "$0")" || exit
 
+# --- CONFIGURACIÓN DE BASE DE DATOS ---
+# Define aquí las credenciales para que Maven pueda conectar a la BD durante los tests
+export DB_USER="persepolis_user"
+export DB_PASSWORD="contrasena"
+
 # Variables de color
 RED='\033[0;31m'
 GREEN='\033[0;32m'
