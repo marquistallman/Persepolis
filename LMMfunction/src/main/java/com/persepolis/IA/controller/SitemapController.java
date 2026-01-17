@@ -3,9 +3,13 @@ package com.persepolis.IA.controller;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
 
 @RestController
 public class SitemapController {
+
+    @Value("${app.domain}")
+    private String domain;
 
     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
     public String sitemap() {
@@ -15,7 +19,7 @@ public class SitemapController {
 
         // Página Principal
         xml.append("  <url>\n");
-        xml.append("    <loc>https://persepoliasia.lat/pages/homepage.html</loc>\n");
+        xml.append("    <loc>").append(domain).append("/pages/homepage.html</loc>\n");
         xml.append("    <changefreq>daily</changefreq>\n");
         xml.append("    <priority>1.0</priority>\n");
         xml.append("  </url>\n");
@@ -25,7 +29,7 @@ public class SitemapController {
         
         for (String cat : categories) {
             xml.append("  <url>\n");
-            xml.append("    <loc>https://persepoliasia.lat/pages/browse.html?q=").append(cat).append("</loc>\n");
+            xml.append("    <loc>").append(domain).append("/pages/browse.html?q=").append(cat).append("</loc>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");
             xml.append("    <priority>0.8</priority>\n");
             xml.append("  </url>\n");

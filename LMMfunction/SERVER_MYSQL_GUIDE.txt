@@ -1,0 +1,85 @@
+================================================================================
+ GUÍA DE INSTALACIÓN Y CONFIGURACIÓN DE MYSQL EN SERVIDOR (UBUNTU/DEBIAN)
+================================================================================
+
+Este documento detalla los pasos para instalar MySQL en un servidor Linux (VPS)
+y configurarlo para la aplicación Persepolis IA.
+
+PASO 1: ACTUALIZAR EL SISTEMA
+--------------------------------------------------------------------------------
+Abre la terminal de tu servidor y ejecuta:
+
+    sudo apt update
+    sudo apt upgrade -y
+
+PASO 2: INSTALAR MYSQL SERVER
+--------------------------------------------------------------------------------
+Instala el servidor de base de datos:
+
+    sudo apt install mysql-server -y
+
+Asegúrate de que el servicio esté corriendo:
+
+    sudo systemctl start mysql
+    sudo systemctl enable mysql
+
+PASO 3: CONFIGURACIÓN DE SEGURIDAD (IMPORTANTE)
+--------------------------------------------------------------------------------
+Ejecuta el script de seguridad interactivo:
+
+    sudo mysql_secure_installation
+
+    - VALIDATE PASSWORD COMPONENT? -> y (Recomendado)
+    - Remove anonymous users? -> y
+    - Disallow root login remotely? -> y (Por seguridad, root solo local)
+    - Remove test database? -> y
+    - Reload privilege tables now? -> y
+
+PASO 4: CREAR BASE DE DATOS Y USUARIO
+--------------------------------------------------------------------------------
+Entra a la consola de MySQL como root (sudo es necesario en Ubuntu por defecto):
+
+    sudo mysql
+
+Dentro de la consola SQL, ejecuta línea por línea (cambia 'TuPasswordSeguro'):
+
+    -- 1. Crear la base de datos
+    CREATE DATABASE wallpaperdb;
+
+    -- 2. Crear un usuario específico para la app (No usar root)
+    CREATE USER 'persepolis_user'@'localhost' IDENTIFIED BY 'TuPasswordSeguro';
+
+    -- 3. Dar permisos al usuario sobre la base de datos
+    GRANT ALL PRIVILEGES ON wallpaperdb.* TO 'persepolis_user'@'localhost';
+
+    -- 4. Aplicar cambios y salir
+    FLUSH PRIVILEGES;
+    EXIT;
+
+PASO 5: CONFIGURAR LA APLICACIÓN (EN EL SERVIDOR)
+--------------------------------------------------------------------------------
+Cuando subas tu archivo .jar al servidor, tienes dos opciones para conectar la BD:
+
+OPCIÓN A: Variables de Entorno (Recomendado, más seguro)
+Al ejecutar el jar, pasas los datos sin tocar el código:
+
+    export DB_USER=persepolis_user
+    export DB_PASSWORD=TuPasswordSeguro
+    java -jar IA-0.0.1-SNAPSHOT.jar
+
+    (Nota: Requiere que application.properties use ${DB_USER} y ${DB_PASSWORD})
+
+OPCIÓN B: Archivo de configuración externo
+Crea un archivo 'application.properties' al lado del .jar con los datos reales:
+
+    spring.datasource.url=jdbc:mysql://localhost:3306/wallpaperdb
+    spring.datasource.username=persepolis_user
+    spring.datasource.password=TuPasswordSeguro
+
+================================================================================
+ NOTAS ADICIONALES
+================================================================================
+- Si el servidor tiene Firewall (UFW), asegúrate de permitir el puerto 8080:
+  sudo ufw allow 8080
+- MySQL corre en el puerto 3306 por defecto y, por seguridad, no debería
+  estar abierto al exterior (internet), solo a 'localhost'.
