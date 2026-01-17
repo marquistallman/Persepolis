@@ -13,6 +13,7 @@ public class WallpaperDTO {
     private boolean hasVideo;
     private String videoUrl;
     private String fullImageUrl;
+    private List<String> palette = new ArrayList<>();
 
     // Getters y Setters
     public String getTitulo() { return titulo; }
@@ -42,6 +43,9 @@ public class WallpaperDTO {
     
     public String getFullImageUrl() { return fullImageUrl; }
     public void setFullImageUrl(String fullImageUrl) { this.fullImageUrl = fullImageUrl; }
+
+    public List<String> getPalette() { return palette; }
+    public void setPalette(List<String> palette) { this.palette = palette; }
 
     @Override
     public String toString() {

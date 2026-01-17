@@ -6,8 +6,8 @@
     <!-- SEO Placeholder: Estos valores serán reemplazados por Thymeleaf si mueves este archivo a /templates/home.html -->
     <title th:text="${pageTitle} ?: 'Persepolis IA - Wallpapers'">Persepolis IA</title>
     <meta name="description" th:content="${pageDescription} ?: 'Buscador de wallpapers con IA'">
-    <!-- SEO: Indica a los buscadores que el contenido real está en /home -->
-    <link rel="canonical" href="/home" />
+    <!-- SEO: Indica a los buscadores que el contenido real está en /pages/homepage.html -->
+    <link rel="canonical" href="/pages/homepage.html" />
     
     <link rel="stylesheet" href="css/main.css">
     <style>
@@ -79,13 +79,13 @@
         <div class="loading-text">Inteligencia Artificial para tus Wallpapers</div>
         
         <!-- Enlace directo en lugar de redirección JS para mejorar SEO -->
-        <a href="/home" style="color: white; text-decoration: underline; font-size: 1.1rem;">Entrar al Buscador</a>
+        <a href="/pages/homepage.html" style="color: white; text-decoration: underline; font-size: 1.1rem;">Entrar al Buscador</a>
     </div>
 
     <script>
         // Redirección automática a la home real
         setTimeout(function() {
-            window.location.href = '/home';
+            window.location.href = '/pages/homepage.html';
         }, 1500);
     </script>
 <script id="dhws-dataInjector" src="/public/dhws-data-injector.js"></script>

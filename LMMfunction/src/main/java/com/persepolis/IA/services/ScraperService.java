@@ -24,11 +24,13 @@ public class ScraperService {
 
     private final WebCacheRepository webCacheRepository;
     private final ObjectMapper objectMapper;
+    private final ColorPaletteService colorPaletteService;
     private static final long SEARCH_CACHE_HOURS = 12; // Tiempo de vida para el caché de búsquedas
     private static final long DETAILS_CACHE_DAYS = 7;  // Tiempo de vida para el caché de detalles
 
-    public ScraperService(WebCacheRepository webCacheRepository) {
+    public ScraperService(WebCacheRepository webCacheRepository, ColorPaletteService colorPaletteService) {
         this.webCacheRepository = webCacheRepository;
+        this.colorPaletteService = colorPaletteService;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -57,7 +59,7 @@ public class ScraperService {
             long hours = ChronoUnit.HOURS.between(data.getLastUpdated(), LocalDateTime.now());
             if (hours < SEARCH_CACHE_HOURS) {
                 System.out.println("--- Devolviendo resultados de búsqueda desde CACHÉ para: " + query);
-                return fromJsonToList(data.getContent());
+                return prioritizeTitleMatches(fromJsonToList(data.getContent()), normalizedQuery);
             }
         }
 
@@ -70,12 +72,32 @@ public class ScraperService {
             System.out.println("--- DEBUG: Scraper encontró (antes guardar) " + results.size() + " items ---");
 
             saveToCache(cacheKey, toJson(results));
-            return results;
+            return prioritizeTitleMatches(results, normalizedQuery);
         } catch (Exception e) {
             System.err.println("--- ERROR en ScraperService (Búsqueda): " + e.getMessage());
             e.printStackTrace();
             return List.of(); // Retorna lista vacía para no romper el front
         }
+    }
+
+    private List<WallpaperDTO> prioritizeTitleMatches(List<WallpaperDTO> results, String query) {
+        if (results == null || results.isEmpty()) {
+            return results;
+        }
+        return results.stream()
+            .sorted((item1, item2) -> {
+                boolean match1 = titleContainsRequest(item1, query);
+                boolean match2 = titleContainsRequest(item2, query);
+                if (match1 && !match2) return -1;
+                if (!match1 && match2) return 1;
+                return 0;
+            })
+            .collect(java.util.stream.Collectors.toList());
+    }
+
+    private boolean titleContainsRequest(WallpaperDTO item, String request) {
+        if (item == null || item.getTitulo() == null || request == null) return false;
+        return item.getTitulo().toLowerCase(java.util.Locale.ROOT).contains(request);
     }
 
     // Métodos de ayuda para depuración
@@ -125,6 +147,11 @@ public class ScraperService {
             System.out.println("--- Obteniendo detalles REALES para: " + url);
             CScrap scraper = new CScrap();
             WallpaperDTO details = scraper.obtenerDetalles(url, site);
+            
+            // Extraer paleta de colores de la preview
+            if (details.getPreview() != null && !details.getPreview().isEmpty()) {
+                details.setPalette(colorPaletteService.extractPalette(details.getPreview(), 5));
+            }
 
             saveToCache(cacheKey, toJson(details));
             return details;

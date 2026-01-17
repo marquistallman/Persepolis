@@ -440,6 +440,17 @@ const BrowseModule = {
         
         document.getElementById('previewCreator').textContent = data.category;
         
+        // --- NEW: Reset Palette Container ---
+        let paletteContainer = document.getElementById('paletteContainer');
+        if (!paletteContainer) {
+            paletteContainer = document.createElement('div');
+            paletteContainer.id = 'paletteContainer';
+            paletteContainer.className = 'flex gap-3 mt-4 mb-2 items-center';
+            const creatorEl = document.getElementById('previewCreator');
+            if (creatorEl && creatorEl.parentNode) creatorEl.parentNode.appendChild(paletteContainer);
+        }
+        paletteContainer.innerHTML = ''; // Limpiar paleta anterior
+
         // Configurar el botón de descarga para abrir el enlace original
         const downloadBtn = modal.querySelector('.btn-accent');
         if (downloadBtn) {
@@ -470,6 +481,11 @@ const BrowseModule = {
             if (response.ok) {
                 const details = await response.json();
                 
+                // --- NEW: Render Palette if available ---
+                if (details.palette && Array.isArray(details.palette)) {
+                    this.renderPalette(details.palette);
+                }
+
                 // Caso 1: Video (MoeWalls)
                 if (details.videoUrl) {
                     const img = document.getElementById('previewImage');
@@ -499,6 +515,26 @@ const BrowseModule = {
         } catch (e) {
             console.error("Error cargando contenido media:", e);
         }
+    },
+
+    renderPalette(colors) {
+        const container = document.getElementById('paletteContainer');
+        if (!container) return;
+        
+        container.innerHTML = '<span class="text-sm text-white/60 mr-2 font-medium">Palette:</span>';
+        
+        colors.forEach(color => {
+            const dot = document.createElement('div');
+            dot.className = 'w-6 h-6 rounded-full cursor-pointer hover:scale-110 transition-transform border border-white/20 shadow-lg';
+            dot.style.backgroundColor = color;
+            dot.title = `Click to copy: ${color}`;
+            dot.onclick = () => {
+                navigator.clipboard.writeText(color);
+                dot.classList.add('ring-2', 'ring-white');
+                setTimeout(() => dot.classList.remove('ring-2', 'ring-white'), 200);
+            };
+            container.appendChild(dot);
+        });
     },
 
     updateDownloadButton(data, directUrl) {
