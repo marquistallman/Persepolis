@@ -484,6 +484,7 @@ const BrowseModule = {
                 // --- NEW: Render Palette if available ---
                 if (details.palette && Array.isArray(details.palette)) {
                     this.renderPalette(details.palette);
+                    this.applyDynamicTheme(details.palette);
                 }
 
                 // Caso 1: Video (MoeWalls)
@@ -537,6 +538,72 @@ const BrowseModule = {
         });
     },
 
+    applyDynamicTheme(palette) {
+        if (!palette || palette.length === 0) return;
+
+        const modal = this.dom.previewModal;
+        const infoContainer = modal.querySelector('.bg-background-light') || modal.querySelector('.dynamic-theme-bg');
+        const title = document.getElementById('previewTitle');
+        const downloadBtn = modal.querySelector('.btn-accent');
+        
+        const mainColor = palette[0];
+        const secondaryColor = palette[1] || '#ffffff';
+
+        if (infoContainer) {
+            infoContainer.classList.remove('bg-background-light');
+            infoContainer.classList.add('dynamic-theme-bg');
+            infoContainer.style.backgroundColor = mainColor;
+            infoContainer.style.transition = 'background-color 0.5s ease, color 0.5s ease';
+            
+            const isDark = this.isColorDark(mainColor);
+            infoContainer.style.color = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)';
+            
+            const creator = document.getElementById('previewCreator');
+            if (creator) creator.style.color = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+        }
+
+        if (title) title.style.color = secondaryColor;
+
+        if (downloadBtn) {
+            downloadBtn.style.backgroundColor = secondaryColor;
+            downloadBtn.style.borderColor = secondaryColor;
+            downloadBtn.style.color = this.isColorDark(secondaryColor) ? '#ffffff' : '#000000';
+        }
+    },
+
+    resetDynamicTheme() {
+        const modal = this.dom.previewModal;
+        const infoContainer = modal.querySelector('.dynamic-theme-bg');
+        const title = document.getElementById('previewTitle');
+        const creator = document.getElementById('previewCreator');
+        const downloadBtn = modal.querySelector('.btn-accent');
+
+        if (infoContainer) {
+            infoContainer.style.backgroundColor = '';
+            infoContainer.style.color = '';
+            infoContainer.classList.remove('dynamic-theme-bg');
+            infoContainer.classList.add('bg-background-light');
+        }
+
+        if (title) title.style.color = '';
+        if (creator) creator.style.color = '';
+        
+        if (downloadBtn) {
+            downloadBtn.style.backgroundColor = '';
+            downloadBtn.style.borderColor = '';
+            downloadBtn.style.color = '';
+        }
+    },
+
+    isColorDark(hexColor) {
+        const hex = hexColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return yiq < 128;
+    },
+
     updateDownloadButton(data, directUrl) {
         const downloadBtn = this.dom.previewModal.querySelector('.btn-accent');
         if (downloadBtn) {
@@ -557,6 +624,8 @@ const BrowseModule = {
         const video = modal.querySelector('video');
         if (video) video.remove();
         document.getElementById('previewImage').classList.remove('hidden');
+        
+        this.resetDynamicTheme();
         
         modal.classList.add('hidden');
         modal.classList.remove('flex');

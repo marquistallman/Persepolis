@@ -57,13 +57,38 @@ public class MotionBackgrounds extends SitioBase {
         try {
             Document doc = crearConexion(url).get();
 
-            Element videoSource = doc.selectFirst("video source[type='video/mp4']");
-            if (videoSource != null) {
-                String videoUrl = videoSource.attr("src");
-                if (!videoUrl.startsWith("http")) {
-                    videoUrl = "https://motionbgs.com" + videoUrl;
+            Element video = doc.selectFirst("video");
+            if (video != null) {
+                String poster = video.attr("poster");
+                if (poster != null && !poster.isEmpty()) {
+                    if (!poster.startsWith("http")) {
+                        poster = "https://motionbgs.com" + poster;
+                    }
+                    detalles.setPreview(poster);
+                    detalles.setFullImageUrl(poster); // Usar poster como imagen para paleta
                 }
-                detalles.setVideoUrl(videoUrl);
+                
+                Element videoSource = video.selectFirst("source[type='video/mp4']");
+                if (videoSource != null) {
+                    String videoUrl = videoSource.attr("src");
+                    if (!videoUrl.startsWith("http")) {
+                        videoUrl = "https://motionbgs.com" + videoUrl;
+                    }
+                    detalles.setVideoUrl(videoUrl);
+                }
+            }
+            
+            // Si no hay poster, buscar una imagen
+            if (detalles.getPreview() == null || detalles.getPreview().isEmpty()) {
+                Element img = doc.selectFirst("img");
+                if (img != null) {
+                    String imgSrc = img.attr("src");
+                    if (!imgSrc.startsWith("http") && !imgSrc.isEmpty()) {
+                        imgSrc = "https://motionbgs.com" + imgSrc;
+                    }
+                    detalles.setPreview(imgSrc);
+                    detalles.setFullImageUrl(imgSrc);
+                }
             }
         } catch (Exception e) {
             System.err.println("Error obteniendo detalles de MotionBackgrounds: " + e.getMessage());

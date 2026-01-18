@@ -19,7 +19,7 @@ public class WebCache {
     private String urlOrQuery; // Duplicado para compatibilidad con esquemas antiguos
 
     @Lob // Large Object para guardar HTML o JSON extenso
-    @Column(columnDefinition = "CLOB") // Asegura compatibilidad con H2 para textos largos
+    @Column(columnDefinition = "LONGTEXT") // Para MySQL, textos largos
     private String content;
 
     private LocalDateTime lastUpdated;

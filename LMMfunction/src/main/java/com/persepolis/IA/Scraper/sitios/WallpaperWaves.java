@@ -46,10 +46,35 @@ public class WallpaperWaves extends SitioBase {
         try {
             Document doc = crearConexion(url).get();
 
+            // Buscar imagen de preview
+            Element img = doc.selectFirst(".jeg_featured_img img, .content-inner img");
+            if (img != null) {
+                String imgSrc = img.attr("src");
+                if (!imgSrc.startsWith("http") && !imgSrc.isEmpty()) {
+                    imgSrc = "https://wallpaperwaves.com" + imgSrc;
+                }
+                detalles.setPreview(imgSrc);
+                detalles.setFullImageUrl(imgSrc);
+            }
+
             // Selector exacto de la versión funcional
             Element videoSource = doc.selectFirst("div.player_responsive video source");
             if (videoSource != null) {
-                detalles.setVideoUrl(videoSource.attr("src"));
+                String videoUrl = videoSource.attr("src");
+                if (!videoUrl.startsWith("http") && !videoUrl.isEmpty()) {
+                    videoUrl = "https://wallpaperwaves.com" + videoUrl;
+                }
+                detalles.setVideoUrl(videoUrl);
+            } else {
+                // Fallback: buscar otros selectores de video
+                Element video = doc.selectFirst("video source");
+                if (video != null) {
+                    String videoUrl = video.attr("src");
+                    if (!videoUrl.startsWith("http") && !videoUrl.isEmpty()) {
+                        videoUrl = "https://wallpaperwaves.com" + videoUrl;
+                    }
+                    detalles.setVideoUrl(videoUrl);
+                }
             }
         } catch (Exception e) {
             System.err.println("Error obteniendo detalles de WallpaperWaves: " + e.getMessage());

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +21,76 @@ public class ColorPaletteService {
      * Utiliza K-Means nativo para evitar dependencias externas como OpenCV.
      */
     public List<String> extractPalette(String imageUrl, int k) {
+        System.out.println("--- PALETTE SERVICE: Procesando URL: " + imageUrl);
         try {
-            URL url = new URL(imageUrl);
-            BufferedImage original = ImageIO.read(url);
-            if (original == null) return new ArrayList<>();
+            // Sanitizar URL (espacios) para URI.create sin usar el obsoleto new URL()
+            URL url;
+            try {
+                url = URI.create(imageUrl.replace(" ", "%20")).toURL();
+            } catch (Exception e) {
+                System.err.println("--- PALETTE ERROR: URL malformada o inválida: " + imageUrl);
+                return new ArrayList<>();
+            }
+            
+            // Usar HttpURLConnection para añadir User-Agent y evitar bloqueos (403 Forbidden)
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            connection.setRequestProperty("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8");
+            connection.setRequestProperty("Referer", "https://www.google.com/");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            
+            String contentType = connection.getContentType();
+            if (contentType != null && contentType.contains("text/html")) {
+                System.err.println("--- PALETTE SKIP: Se ignoró URL porque es HTML: " + imageUrl);
+                return new ArrayList<>();
+            }
+            
+            BufferedImage original = ImageIO.read(connection.getInputStream());
+            if (original == null) {
+                // ImageIO devuelve null si el formato no es soportado (ej. WebP en JDKs antiguos sin plugins)
+                System.err.println("--- PALETTE ERROR: ImageIO devolvió NULL (¿Es un HTML en vez de imagen?): " + imageUrl);
+                
+                // Intentar formatos alternativos (jpg, jpeg, png) si es .webp
+                if (imageUrl.toLowerCase().endsWith(".webp")) {
+                    System.out.println("--- PALETTE: Intentando formatos alternativos para WebP");
+                    String[] extensions = {".jpg", ".jpeg", ".png"};
+                    for (String ext : extensions) {
+                        String altUrl = imageUrl.substring(0, imageUrl.length() - 5) + ext; // Reemplazar .webp
+                        System.out.println("--- PALETTE: Probando URL alternativa: " + altUrl);
+                        try {
+                            URL altURL = URI.create(altUrl.replace(" ", "%20")).toURL();
+                            HttpURLConnection altConn = (HttpURLConnection) altURL.openConnection();
+                            altConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                            altConn.setRequestProperty("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8");
+                            altConn.setRequestProperty("Referer", "https://www.google.com/");
+                            altConn.setConnectTimeout(10000);
+                            altConn.setReadTimeout(10000);
+                            
+                            String altContentType = altConn.getContentType();
+                            if (altContentType != null && altContentType.contains("text/html")) {
+                                System.out.println("--- PALETTE: Saltando URL alternativa porque es HTML: " + altUrl);
+                                continue;
+                            }
+                            
+                            original = ImageIO.read(altConn.getInputStream());
+                            if (original != null) {
+                                System.out.println("--- PALETTE SUCCESS: Usando formato alternativo: " + altUrl);
+                                break;
+                            } else {
+                                System.out.println("--- PALETTE: Formato alternativo también falló: " + altUrl);
+                            }
+                        } catch (Exception e2) {
+                            System.out.println("--- PALETTE: Excepción en alternativa " + altUrl + ": " + e2.getMessage());
+                        }
+                    }
+                }
+                
+                if (original == null) {
+                    System.out.println("--- PALETTE: No se pudo cargar imagen en ningún formato");
+                    return new ArrayList<>();
+                }
+            }
 
             // 1. Redimensionar para velocidad (max 100px)
             BufferedImage image = resize(original, 100);
@@ -51,7 +119,7 @@ public class ColorPaletteService {
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            System.err.println("Error extrayendo paleta: " + e.getMessage());
+            System.err.println("--- PALETTE EXCEPTION: " + e.getMessage() + " procesando " + imageUrl);
             return new ArrayList<>();
         }
     }

@@ -13,6 +13,13 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Servicio encargado de la obtención de wallpapers.
@@ -130,7 +137,7 @@ public class ScraperService {
      * raramente cambian.
      */
     public WallpaperDTO getWallpaperDetails(String url, String site) {
-        String cacheKey = "details:" + site + ":" + url;
+        String cacheKey = "details:" + site + ":" + url + ":v2";
 
         Optional<WebCache> cached = webCacheRepository.findByCacheKey(cacheKey);
 
@@ -139,7 +146,27 @@ public class ScraperService {
             long days = ChronoUnit.DAYS.between(data.getLastUpdated(), LocalDateTime.now());
             if (days < DETAILS_CACHE_DAYS) {
                  System.out.println("--- Devolviendo detalles desde CACHÉ para: " + url);
-                return fromJsonToDto(data.getContent());
+                WallpaperDTO dto = fromJsonToDto(data.getContent());
+                
+                // Si la paleta no existe en caché (versiones viejas), intentamos extraerla ahora
+                if (dto.getPalette() == null || dto.getPalette().size() < 5) {
+                    String img = dto.getPreview();
+                    
+                    // Si no hay preview, intentar extraerla del HTML original
+                    if (img == null || img.isEmpty()) {
+                        img = extractPreviewFromHtml(dto.getEnlace());
+                        if (img != null && !img.isEmpty()) dto.setPreview(img);
+                    }
+                    
+                    if (img == null || img.isEmpty()) img = dto.getFullImageUrl();
+                    
+                    if (img != null && !img.isEmpty()) {
+                        System.out.println("--- CACHE: Paleta insuficiente/faltante, re-extrayendo de: " + img);
+                        dto.setPalette(colorPaletteService.extractPalette(img, 5));
+                        if (dto.getPalette() != null && !dto.getPalette().isEmpty()) saveToCache(cacheKey, toJson(dto));
+                    }
+                }
+                return dto;
             }
         }
 
@@ -148,9 +175,30 @@ public class ScraperService {
             CScrap scraper = new CScrap();
             WallpaperDTO details = scraper.obtenerDetalles(url, site);
             
-            // Extraer paleta de colores de la preview
-            if (details.getPreview() != null && !details.getPreview().isEmpty()) {
-                details.setPalette(colorPaletteService.extractPalette(details.getPreview(), 5));
+            System.out.println("--- DEBUG: fullImageUrl after obtenerDetalles: " + details.getFullImageUrl());
+            System.out.println("--- DEBUG: preview after obtenerDetalles: " + details.getPreview());
+            System.out.println("--- DEBUG: palette size after obtenerDetalles: " + (details.getPalette() != null ? details.getPalette().size() : "null"));
+            
+            // Extraer paleta de colores usando la imagen del preview
+            String imgToProcess = details.getPreview();
+            
+            // Si no hay preview, intentar extraerla del HTML
+            if (imgToProcess == null || imgToProcess.isEmpty()) {
+                imgToProcess = extractPreviewFromHtml(url);
+                if (imgToProcess != null && !imgToProcess.isEmpty()) {
+                    System.out.println("--- DEBUG: Preview recuperada del HTML: " + imgToProcess);
+                    details.setPreview(imgToProcess);
+                }
+            }
+            
+            System.out.println("--- DEBUG: imgToProcess final: " + imgToProcess);
+            
+            if ((details.getPalette() == null || details.getPalette().size() < 5) && imgToProcess != null && !imgToProcess.isEmpty()) {
+                System.out.println("--- SCRAPER: Iniciando extracción de paleta para: " + imgToProcess);
+                details.setPalette(colorPaletteService.extractPalette(imgToProcess, 5));
+                System.out.println("--- DEBUG: Palette extraída, size: " + details.getPalette().size());
+            } else {
+                System.out.println("--- DEBUG: No se extrajo paleta, condición no cumplida");
             }
 
             saveToCache(cacheKey, toJson(details));
@@ -211,5 +259,42 @@ public class ScraperService {
 
     private WallpaperDTO fromJsonToDto(String json) {
         try { return objectMapper.readValue(json, WallpaperDTO.class); } catch (Exception e) { return new WallpaperDTO(); }
+    }
+
+    /**
+     * Método auxiliar para extraer la URL de la imagen de previsualización desde el HTML.
+     * Busca la etiqueta <img id="previewImage" src="...">
+     */
+    private String extractPreviewFromHtml(String pageUrl) {
+        if (pageUrl == null || pageUrl.isEmpty()) return null;
+        try {
+            URL url = URI.create(pageUrl.replace(" ", "%20")).toURL();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+            conn.setConnectTimeout(5000);
+            
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                StringBuilder content = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) content.append(line);
+                
+                String html = content.toString();
+                
+                // 1. Intentar con Open Graph (Estándar global: og:image)
+                Matcher mOg = Pattern.compile("<meta\\s+property=[\"']og:image[\"']\\s+content=[\"']([^\"']+)[\"']", Pattern.CASE_INSENSITIVE).matcher(html);
+                if (mOg.find()) return mOg.group(1);
+                
+                // 2. Intentar con Open Graph invertido (content antes de property)
+                Matcher mOg2 = Pattern.compile("<meta\\s+content=[\"']([^\"']+)[\"']\\s+property=[\"']og:image[\"']", Pattern.CASE_INSENSITIVE).matcher(html);
+                if (mOg2.find()) return mOg2.group(1);
+                
+                // 3. Intentar con ID específico (Legacy)
+                Matcher mId = Pattern.compile("id=[\"']previewImage[\"'][^>]*src=[\"']([^\"']+)[\"']", Pattern.CASE_INSENSITIVE).matcher(html);
+                if (mId.find()) return mId.group(1);
+            }
+        } catch (Exception e) {
+            System.err.println("--- Error extrayendo preview del HTML (" + pageUrl + "): " + e.getMessage());
+        }
+        return null;
     }
 }
