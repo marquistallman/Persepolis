@@ -426,6 +426,8 @@ const BrowseModule = {
         const modal = this.dom.previewModal;
         const img = document.getElementById('previewImage');
         
+        this.resetDynamicTheme();
+        
         // Resetear estado del modal (quitar video anterior si existe)
         const existingVideo = modal.querySelector('video');
         if (existingVideo) existingVideo.remove();
@@ -440,6 +442,17 @@ const BrowseModule = {
         
         document.getElementById('previewCreator').textContent = data.category;
         
+        // --- NEW: Reset Palette Container ---
+        let paletteContainer = document.getElementById('paletteContainer');
+        if (!paletteContainer) {
+            paletteContainer = document.createElement('div');
+            paletteContainer.id = 'paletteContainer';
+            paletteContainer.className = 'flex gap-3 mt-4 mb-2 items-center';
+            const creatorEl = document.getElementById('previewCreator');
+            if (creatorEl && creatorEl.parentNode && creatorEl.parentNode.parentNode) creatorEl.parentNode.parentNode.appendChild(paletteContainer);
+        }
+        paletteContainer.innerHTML = ''; // Limpiar paleta anterior
+
         // Configurar el botón de descarga para abrir el enlace original
         const downloadBtn = modal.querySelector('.btn-accent');
         if (downloadBtn) {
@@ -470,6 +483,12 @@ const BrowseModule = {
             if (response.ok) {
                 const details = await response.json();
                 
+                // --- NEW: Render Palette if available ---
+                if (details.palette && Array.isArray(details.palette)) {
+                    this.renderPalette(details.palette);
+                    this.applyDynamicTheme(details.palette);
+                }
+
                 // Caso 1: Video (MoeWalls)
                 if (details.videoUrl) {
                     const img = document.getElementById('previewImage');
@@ -501,6 +520,106 @@ const BrowseModule = {
         }
     },
 
+    renderPalette(colors) {
+        const container = document.getElementById('paletteContainer');
+        if (!container) return;
+        
+        container.innerHTML = '<span class="text-sm text-text-secondary mr-2 font-medium">Palette:</span>';
+        
+        colors.forEach(color => {
+            const dot = document.createElement('div');
+            dot.className = 'w-6 h-6 rounded-full cursor-pointer hover:scale-110 transition-transform border border-white/20 shadow-lg';
+            dot.style.backgroundColor = color;
+            dot.title = `Click to copy: ${color}`;
+            dot.onclick = () => {
+                navigator.clipboard.writeText(color);
+                dot.classList.add('ring-2', 'ring-offset-1', 'ring-text-primary');
+                setTimeout(() => dot.classList.remove('ring-2', 'ring-offset-1', 'ring-text-primary'), 200);
+            };
+            container.appendChild(dot);
+        });
+    },
+
+    applyDynamicTheme(palette) {
+        if (!palette || palette.length === 0) return;
+
+        const modal = this.dom.previewModal;
+        const contentWrapper = modal.querySelector('.modal-content'); // Contenedor principal para rellenar espacios
+        const infoContainer = modal.querySelector('.bg-background-light') || modal.querySelector('.dynamic-theme-bg');
+        const title = document.getElementById('previewTitle');
+        const downloadBtn = modal.querySelector('.btn-accent');
+        
+        const mainColor = palette[0];
+        const secondaryColor = palette[1] || '#ffffff';
+        const isDark = this.isColorDark(mainColor);
+        const textColor = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)';
+        const mutedColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+
+        if (contentWrapper) {
+            contentWrapper.style.backgroundColor = mainColor;
+            contentWrapper.style.transition = 'background-color 0.5s ease';
+        }
+
+        if (infoContainer) {
+            infoContainer.classList.remove('bg-background-light');
+            infoContainer.classList.add('dynamic-theme-bg');
+            infoContainer.style.backgroundColor = mainColor;
+            infoContainer.style.transition = 'background-color 0.5s ease, color 0.5s ease';
+            
+            infoContainer.style.color = textColor;
+            
+            const creator = document.getElementById('previewCreator');
+            if (creator) creator.style.color = mutedColor;
+        }
+
+        // Usar textColor para el título para garantizar contraste, en lugar de secondaryColor
+        if (title) title.style.color = textColor;
+
+        if (downloadBtn) {
+            downloadBtn.style.backgroundColor = secondaryColor;
+            downloadBtn.style.borderColor = secondaryColor;
+            downloadBtn.style.color = this.isColorDark(secondaryColor) ? '#ffffff' : '#000000';
+        }
+    },
+
+    resetDynamicTheme() {
+        const modal = this.dom.previewModal;
+        const contentWrapper = modal.querySelector('.modal-content');
+        const infoContainer = modal.querySelector('.dynamic-theme-bg');
+        const title = document.getElementById('previewTitle');
+        const creator = document.getElementById('previewCreator');
+        const downloadBtn = modal.querySelector('.btn-accent');
+
+        if (contentWrapper) {
+            contentWrapper.style.backgroundColor = '';
+        }
+
+        if (infoContainer) {
+            infoContainer.style.backgroundColor = '';
+            infoContainer.style.color = '';
+            infoContainer.classList.remove('dynamic-theme-bg');
+            infoContainer.classList.add('bg-background-light');
+        }
+
+        if (title) title.style.color = '';
+        if (creator) creator.style.color = '';
+        
+        if (downloadBtn) {
+            downloadBtn.style.backgroundColor = '';
+            downloadBtn.style.borderColor = '';
+            downloadBtn.style.color = '';
+        }
+    },
+
+    isColorDark(hexColor) {
+        const hex = hexColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return yiq < 128;
+    },
+
     updateDownloadButton(data, directUrl) {
         const downloadBtn = this.dom.previewModal.querySelector('.btn-accent');
         if (downloadBtn) {
@@ -521,6 +640,8 @@ const BrowseModule = {
         const video = modal.querySelector('video');
         if (video) video.remove();
         document.getElementById('previewImage').classList.remove('hidden');
+        
+        this.resetDynamicTheme();
         
         modal.classList.add('hidden');
         modal.classList.remove('flex');

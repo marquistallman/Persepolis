@@ -46,6 +46,16 @@ Dentro de la consola SQL, ejecuta línea por línea (cambia 'TuPasswordSeguro'):
     -- 1. Crear la base de datos
     CREATE DATABASE wallpaperdb;
 
+    -- 1.1 Seleccionar la base de datos y crear tabla (Evita error 'Table doesn't exist')
+    USE wallpaperdb;
+    CREATE TABLE IF NOT EXISTS web_cache (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        cache_key VARCHAR(255),
+        url_or_query VARCHAR(255),
+        content LONGTEXT,
+        last_updated DATETIME
+    );
+
     -- 2. Crear un usuario específico para la app (No usar root)
     CREATE USER 'persepolis_user'@'localhost' IDENTIFIED BY 'TuPasswordSeguro';
 

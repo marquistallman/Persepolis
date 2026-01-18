@@ -293,11 +293,11 @@ public class ChatService {
             }
 
             List<WallpaperDTO> finalResultsList = urlCounts.entrySet().stream()
-                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // Ordenar por popularidad (conteo)
+                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                 .map(e -> uniqueResults.get(e.getKey()))
                 .collect(Collectors.toList());
 
-            StringBuilder sb = new StringBuilder(chatData.getResponse("resultsHeader", originalRequest));
+            StringBuilder sb = new StringBuilder(chatData.getResponse("resultsHeader", originalRequest != null ? originalRequest : query));
             
             response.put("message", sb.toString());
             response.put("results", finalResultsList);

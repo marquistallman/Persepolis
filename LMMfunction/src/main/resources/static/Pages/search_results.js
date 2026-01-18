@@ -191,27 +191,189 @@ const SearchModule = {
     },
 
     openPreview(data) {
-        // Logic to populate and show modal
         const modal = this.dom.previewModal;
-        document.getElementById('previewImage').src = data.fullUrl || data.thumbnailUrl;
+        const img = document.getElementById('previewImage');
+        
+        this.resetDynamicTheme();
+        
+        // Resetear estado del modal (quitar video anterior si existe)
+        const existingVideo = modal.querySelector('video');
+        if (existingVideo) existingVideo.remove();
+        img.classList.remove('hidden');
+        
+        img.src = data.thumbnailUrl;
         
         const titleEl = document.getElementById('previewTitle');
         titleEl.innerHTML = `<a href="${data.fullUrl}" target="_blank" class="hover:text-accent transition-colors">${data.title}</a>`;
         
+        // --- NEW: Reset Palette Container ---
+        let paletteContainer = document.getElementById('paletteContainer');
+        if (!paletteContainer) {
+            paletteContainer = document.createElement('div');
+            paletteContainer.id = 'paletteContainer';
+            paletteContainer.className = 'flex gap-3 mt-4 mb-2 items-center';
+            const creatorEl = document.getElementById('previewCreator');
+            if (creatorEl && creatorEl.parentNode) creatorEl.parentNode.appendChild(paletteContainer);
+        }
+        paletteContainer.innerHTML = '';
+
         // Configurar el botón de descarga si existe en este modal
         const downloadBtn = modal.querySelector('.btn-accent');
         if (downloadBtn) {
-            downloadBtn.onclick = () => window.open(data.fullUrl, '_blank');
+            const newBtn = downloadBtn.cloneNode(true);
+            downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
+            newBtn.onclick = () => window.open(data.fullUrl, '_blank');
         }
         
-        // ... populate other fields
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        
+        this.fetchMediaContent(data);
+    },
+
+    async fetchMediaContent(data) {
+        try {
+            const response = await fetch(`/scraper/details?url=${encodeURIComponent(data.fullUrl)}&site=${encodeURIComponent(data.category)}`);
+            if (response.ok) {
+                const details = await response.json();
+                
+                if (details.palette && Array.isArray(details.palette)) {
+                    this.renderPalette(details.palette);
+                    this.applyDynamicTheme(details.palette);
+                }
+
+                if (details.videoUrl) {
+                    const img = document.getElementById('previewImage');
+                    const video = document.createElement('video');
+                    video.src = details.videoUrl;
+                    video.className = "block w-auto max-w-full max-h-[60vh] mx-auto rounded-t-xl";
+                    video.controls = true;
+                    video.autoplay = true;
+                    video.loop = true;
+                    video.muted = true;
+                    img.classList.add('hidden');
+                    img.parentElement.insertBefore(video, img);
+                    this.updateDownloadButton(data, details.videoUrl);
+                } else if (details.fullImageUrl) {
+                    document.getElementById('previewImage').src = details.fullImageUrl;
+                    this.updateDownloadButton(data, details.fullImageUrl);
+                }
+            }
+        } catch (e) {
+            console.error("Error loading media details:", e);
+        }
+    },
+
+    renderPalette(colors) {
+        const container = document.getElementById('paletteContainer');
+        if (!container) return;
+        container.innerHTML = '<span class="text-sm text-text-secondary mr-2 font-medium">Palette:</span>';
+        colors.forEach(color => {
+            const dot = document.createElement('div');
+            dot.className = 'w-6 h-6 rounded-full cursor-pointer hover:scale-110 transition-transform border border-white/20 shadow-lg';
+            dot.style.backgroundColor = color;
+            dot.onclick = () => navigator.clipboard.writeText(color);
+            container.appendChild(dot);
+        });
+    },
+
+    applyDynamicTheme(palette) {
+        if (!palette || palette.length === 0) return;
+
+        const modal = this.dom.previewModal;
+        const contentWrapper = modal.querySelector('.modal-content');
+        const infoContainer = modal.querySelector('.bg-background-light') || modal.querySelector('.dynamic-theme-bg');
+        const title = document.getElementById('previewTitle');
+        const downloadBtn = modal.querySelector('.btn-accent');
+        
+        const mainColor = palette[0];
+        const secondaryColor = palette[1] || '#ffffff';
+        const isDark = this.isColorDark(mainColor);
+        const textColor = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)';
+        const mutedColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+
+        if (contentWrapper) {
+            contentWrapper.style.backgroundColor = mainColor;
+            contentWrapper.style.transition = 'background-color 0.5s ease';
+        }
+
+        if (infoContainer) {
+            infoContainer.classList.remove('bg-background-light');
+            infoContainer.classList.add('dynamic-theme-bg');
+            infoContainer.style.backgroundColor = mainColor;
+            infoContainer.style.transition = 'background-color 0.5s ease, color 0.5s ease';
+            infoContainer.style.color = textColor;
+            
+            const creator = document.getElementById('previewCreator');
+            if (creator) creator.style.color = mutedColor;
+        }
+
+        if (title) title.style.color = textColor;
+
+        if (downloadBtn) {
+            downloadBtn.style.backgroundColor = secondaryColor;
+            downloadBtn.style.borderColor = secondaryColor;
+            downloadBtn.style.color = this.isColorDark(secondaryColor) ? '#ffffff' : '#000000';
+        }
+    },
+
+    resetDynamicTheme() {
+        const modal = this.dom.previewModal;
+        const contentWrapper = modal.querySelector('.modal-content');
+        const infoContainer = modal.querySelector('.dynamic-theme-bg');
+        const title = document.getElementById('previewTitle');
+        const creator = document.getElementById('previewCreator');
+        const downloadBtn = modal.querySelector('.btn-accent');
+
+        if (contentWrapper) {
+            contentWrapper.style.backgroundColor = '';
+        }
+
+        if (infoContainer) {
+            infoContainer.style.backgroundColor = '';
+            infoContainer.style.color = '';
+            infoContainer.classList.remove('dynamic-theme-bg');
+            infoContainer.classList.add('bg-background-light');
+        }
+
+        if (title) title.style.color = '';
+        if (creator) creator.style.color = '';
+        
+        if (downloadBtn) {
+            downloadBtn.style.backgroundColor = '';
+            downloadBtn.style.borderColor = '';
+            downloadBtn.style.color = '';
+        }
+    },
+
+    isColorDark(hexColor) {
+        const hex = hexColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return yiq < 128;
+    },
+
+    updateDownloadButton(data, directUrl) {
+        const downloadBtn = this.dom.previewModal.querySelector('.btn-accent');
+        if (downloadBtn) {
+            const newBtn = downloadBtn.cloneNode(true);
+            downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
+            newBtn.onclick = () => window.open(directUrl, '_blank');
+        }
     },
 
     closeModal() {
-        this.dom.previewModal.classList.add('hidden');
-        this.dom.previewModal.classList.remove('flex');
+        const modal = this.dom.previewModal;
+        const video = modal.querySelector('video');
+        if (video) video.remove();
+        document.getElementById('previewImage').classList.remove('hidden');
+        
+        this.resetDynamicTheme();
+        
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     },
 
     handleSearchInput(e) {
