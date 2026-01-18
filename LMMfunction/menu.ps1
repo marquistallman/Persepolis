@@ -132,6 +132,14 @@ function Integrate-Frontend {
 
 function Build-Jar {
     if (-not (Check-Command "mvn" "Maven")) { Pause-Script; return }
+    
+    # Verificar si el frontend está integrado antes de compilar para evitar JAR vacío
+    if (-not (Test-Path "src/main/resources/static/Pages")) {
+        Write-Host "⚠️  ALERTA: No se detectaron archivos de frontend en 'static/Pages'." -ForegroundColor Yellow
+        $ans = Read-Host "    ¿Quieres integrar el frontend antes de generar el JAR? (s/n)"
+        if ($ans -match "^[sS]") { Integrate-Frontend }
+    }
+
     Write-Host "--> Generando archivo .jar..." -ForegroundColor Yellow
     mvn clean package
     Write-Host "✅ Archivo generado en la carpeta 'target'." -ForegroundColor Green
