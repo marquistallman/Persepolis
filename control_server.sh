@@ -29,7 +29,7 @@ case "$1" in
             # 1. Crear sesión y ventana para Java (Backend)
             tmux new-session -d -s $SESSION -n 'Backend'
             tmux send-keys -t $SESSION:0 "export DB_USER=persepolis_user" C-m
-            tmux send-keys -t $SESSION:0 "export DB_PASSWORD=TuPasswordSeguro" C-m
+            tmux send-keys -t $SESSION:0 "export DB_PASSWORD=contrasena" C-m
             tmux send-keys -t $SESSION:0 "java -Xms512m -Xmx2g -XX:+UseG1GC -jar $JAR_FILE" C-m
             
             # 2. Crear ventana para Cloudflare Tunnel
