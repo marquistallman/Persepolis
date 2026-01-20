@@ -1,0 +1,6 @@
+car:vehicle,auto,bmw,audi,mercedes,ferrari,lamborghini,porsche,racing,speed,jdm,drift
+anime:manga,otaku,waifu,naruto,one piece,dragon ball,studio ghibli,animation,japan,kawaii
+nature:landscape,forest,mountain,river,sea,ocean,tree,flower,sky,sunset,sunrise,clouds,rain
+space:galaxy,universe,star,planet,astronaut,nasa,moon,mars,nebula,interstellar,cosmos
+minimalist:simple,clean,flat,vector,geometry,lines,abstract,minimal,white,black
+city:urban,architecture,building,skyscraper,night,street,lights,cyberpunk,tokyo,new york
