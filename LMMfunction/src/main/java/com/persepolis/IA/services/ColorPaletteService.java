@@ -18,7 +18,7 @@ public class ColorPaletteService {
 
     /**
      * Extrae una paleta de colores de una imagen dada por URL.
-     * Utiliza K-Means nativo para evitar dependencias externas como OpenCV.
+     * Utiliza K-Means en espacio de color CIELAB para mejor percepción humana.
      */
     public List<String> extractPalette(String imageUrl, int k) {
         System.out.println("--- PALETTE SERVICE: Procesando URL: " + imageUrl);
@@ -95,27 +95,29 @@ public class ColorPaletteService {
             // 1. Redimensionar para velocidad (max 100px)
             BufferedImage image = resize(original, 100);
 
-            // 2. Obtener píxeles
-            List<int[]> pixels = new ArrayList<>();
+            // 2. Obtener píxeles y convertir a CIELAB
+            List<double[]> labPixels = new ArrayList<>();
             int width = image.getWidth();
             int height = image.getHeight();
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int rgb = image.getRGB(x, y);
-                    pixels.add(new int[]{
-                        (rgb >> 16) & 0xFF, // R
-                        (rgb >> 8) & 0xFF,  // G
-                        (rgb) & 0xFF        // B
-                    });
+                    int r = (rgb >> 16) & 0xFF;
+                    int g = (rgb >> 8) & 0xFF;
+                    int b = (rgb) & 0xFF;
+                    labPixels.add(rgbToLab(r, g, b));
                 }
             }
 
-            // 3. K-Means simple
-            List<int[]> centroids = calculateKMeans(pixels, k);
+            // 3. K-Means en espacio Lab
+            List<double[]> centroids = calculateKMeans(labPixels, k);
 
-            // 4. Convertir a Hex
+            // 4. Convertir a Hex (Lab -> RGB -> Hex)
             return centroids.stream()
-                    .map(c -> String.format("#%02X%02X%02X", c[0], c[1], c[2]))
+                    .map(c -> {
+                        int[] rgb = labToRgb(c[0], c[1], c[2]);
+                        return String.format("#%02X%02X%02X", rgb[0], rgb[1], rgb[2]);
+                    })
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -143,16 +145,16 @@ public class ColorPaletteService {
         return resized;
     }
 
-    private List<int[]> calculateKMeans(List<int[]> pixels, int k) {
+    private List<double[]> calculateKMeans(List<double[]> pixels, int k) {
         Random random = new Random();
-        List<int[]> centroids = new ArrayList<>();
+        List<double[]> centroids = new ArrayList<>();
         for (int i = 0; i < k; i++) centroids.add(pixels.get(random.nextInt(pixels.size())));
 
         for (int iter = 0; iter < 10; iter++) { // Max 10 iteraciones
-            List<List<int[]>> clusters = new ArrayList<>();
+            List<List<double[]>> clusters = new ArrayList<>();
             for (int i = 0; i < k; i++) clusters.add(new ArrayList<>());
 
-            for (int[] pixel : pixels) {
+            for (double[] pixel : pixels) {
                 int nearest = 0;
                 double minDist = Double.MAX_VALUE;
                 for (int i = 0; i < k; i++) {
@@ -166,15 +168,90 @@ public class ColorPaletteService {
 
             boolean changed = false;
             for (int i = 0; i < k; i++) {
-                List<int[]> cluster = clusters.get(i);
+                List<double[]> cluster = clusters.get(i);
                 if (cluster.isEmpty()) continue;
-                long r = 0, g = 0, b = 0;
-                for (int[] p : cluster) { r += p[0]; g += p[1]; b += p[2]; }
-                int[] newC = new int[]{(int)(r/cluster.size()), (int)(g/cluster.size()), (int)(b/cluster.size())};
-                if (Math.abs(newC[0]-centroids.get(i)[0]) > 1) { centroids.set(i, newC); changed = true; }
+                
+                double sumL = 0, sumA = 0, sumB = 0;
+                for (double[] p : cluster) { sumL += p[0]; sumA += p[1]; sumB += p[2]; }
+                
+                double[] newC = new double[]{ sumL/cluster.size(), sumA/cluster.size(), sumB/cluster.size() };
+                
+                double distChange = Math.pow(newC[0]-centroids.get(i)[0], 2) + 
+                                    Math.pow(newC[1]-centroids.get(i)[1], 2) + 
+                                    Math.pow(newC[2]-centroids.get(i)[2], 2);
+                                    
+                if (distChange > 0.1) { centroids.set(i, newC); changed = true; }
             }
             if (!changed) break;
         }
         return centroids;
+    }
+
+    // --- Conversión de Espacios de Color (RGB <-> CIELAB) ---
+
+    private double[] rgbToLab(int r, int g, int b) {
+        // RGB to XYZ
+        double var_R = (r / 255.0);
+        double var_G = (g / 255.0);
+        double var_B = (b / 255.0);
+
+        if (var_R > 0.04045) var_R = Math.pow(((var_R + 0.055) / 1.055), 2.4); else var_R = var_R / 12.92;
+        if (var_G > 0.04045) var_G = Math.pow(((var_G + 0.055) / 1.055), 2.4); else var_G = var_G / 12.92;
+        if (var_B > 0.04045) var_B = Math.pow(((var_B + 0.055) / 1.055), 2.4); else var_B = var_B / 12.92;
+
+        var_R = var_R * 100; var_G = var_G * 100; var_B = var_B * 100;
+
+        double X = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805;
+        double Y = var_R * 0.2126 + var_G * 0.7152 + var_B * 0.0722;
+        double Z = var_R * 0.0193 + var_G * 0.1192 + var_B * 0.9505;
+
+        // XYZ to Lab
+        double var_X = X / 95.047;
+        double var_Y = Y / 100.000;
+        double var_Z = Z / 108.883;
+
+        if (var_X > 0.008856) var_X = Math.pow(var_X, (1.0 / 3)); else var_X = (7.787 * var_X) + (16.0 / 116);
+        if (var_Y > 0.008856) var_Y = Math.pow(var_Y, (1.0 / 3)); else var_Y = (7.787 * var_Y) + (16.0 / 116);
+        if (var_Z > 0.008856) var_Z = Math.pow(var_Z, (1.0 / 3)); else var_Z = (7.787 * var_Z) + (16.0 / 116);
+
+        double L = (116 * var_Y) - 16;
+        double a = 500 * (var_X - var_Y);
+        double bb = 200 * (var_Y - var_Z);
+
+        return new double[]{L, a, bb};
+    }
+
+    private int[] labToRgb(double L, double a, double b) {
+        double var_Y = (L + 16) / 116;
+        double var_X = a / 500 + var_Y;
+        double var_Z = var_Y - b / 200;
+
+        if (Math.pow(var_Y, 3) > 0.008856) var_Y = Math.pow(var_Y, 3); else var_Y = (var_Y - 16.0 / 116) / 7.787;
+        if (Math.pow(var_X, 3) > 0.008856) var_X = Math.pow(var_X, 3); else var_X = (var_X - 16.0 / 116) / 7.787;
+        if (Math.pow(var_Z, 3) > 0.008856) var_Z = Math.pow(var_Z, 3); else var_Z = (var_Z - 16.0 / 116) / 7.787;
+
+        double X = 95.047 * var_X;
+        double Y = 100.000 * var_Y;
+        double Z = 108.883 * var_Z;
+
+        double var_R = X * 3.2406 + Y * -1.5372 + Z * -0.4986;
+        double var_G = X * -0.9689 + Y * 1.8758 + Z * 0.0415;
+        double var_B = X * 0.0557 + Y * -0.2040 + Z * 1.0570;
+
+        var_R = var_R / 100; var_G = var_G / 100; var_B = var_B / 100;
+
+        if (var_R > 0.0031308) var_R = 1.055 * Math.pow(var_R, (1 / 2.4)) - 0.055; else var_R = 12.92 * var_R;
+        if (var_G > 0.0031308) var_G = 1.055 * Math.pow(var_G, (1 / 2.4)) - 0.055; else var_G = 12.92 * var_G;
+        if (var_B > 0.0031308) var_B = 1.055 * Math.pow(var_B, (1 / 2.4)) - 0.055; else var_B = 12.92 * var_B;
+
+        int r = (int) Math.round(var_R * 255);
+        int g = (int) Math.round(var_G * 255);
+        int bb = (int) Math.round(var_B * 255);
+
+        return new int[]{
+            Math.min(255, Math.max(0, r)),
+            Math.min(255, Math.max(0, g)),
+            Math.min(255, Math.max(0, bb))
+        };
     }
 }
