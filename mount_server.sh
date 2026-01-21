@@ -19,6 +19,8 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+CONFIG_FILE="server.conf"
+
 echo "--- 1. Actualizando sistema y paquetes base ---"
 apt-get update -qq
 
@@ -103,6 +105,61 @@ else
     echo "Advertencia: $CONTROL_SCRIPT no encontrado en el directorio actual."
 fi
 
+echo "--- 8. Configurando Archivo de Configuración ($CONFIG_FILE) ---"
+
+# Función para leer o preguntar por una variable
+get_config_value() {
+    VAR_NAME=$1
+    VAR_PROMPT=$2
+    
+    # Intentar leer desde el archivo, sino preguntar
+    if [ -f "$CONFIG_FILE" ]; then
+        VALUE=$(grep "^${VAR_NAME}=" "$CONFIG_FILE" | cut -d'=' -f2)
+    fi
+    
+    if [ -z "$VALUE" ]; then
+        read -p "$VAR_PROMPT: " VALUE
+        echo "${VAR_NAME}=${VALUE}" >> "$CONFIG_FILE"
+    fi
+    
+    echo "$VALUE"
+}
+
+# Preguntar por las variables si no existen
+DB_USER=$(get_config_value "DB_USER" "Usuario de la base de datos (SQL)")
+DB_PASSWORD=$(get_config_value "DB_PASSWORD" "Contraseña de la base de datos (SQL)")
+TELEGRAM_BOT_TOKEN=$(get_config_value "TELEGRAM_BOT_TOKEN" "Token del bot de Telegram")
+TELEGRAM_CHAT_ID=$(get_config_value "TELEGRAM_CHAT_ID" "ID del chat de Telegram")
+OPENROUTER_KEY=$(get_config_value "OPENROUTER_KEY" "OpenRouter API Key")
+OPENROUTER_MODEL=$(get_config_value "OPENROUTER_MODEL" "Modelo de OpenRouter")
+
+# Menú para editar la configuración
+edit_config() {
+    while true; do
+        echo -e "\n--- Editar Configuración ---"
+        echo "1. Usuario de la base de datos"
+        echo "2. Contraseña de la base de datos"
+        echo "3. Token del bot de Telegram"
+        echo "4. ID del chat de Telegram"
+        echo "5. OpenRouter API Key"
+        echo "6. Modelo de OpenRouter"
+        echo "7. Mostrar configuración actual"
+        echo "8. Salir"
+        read -p "Seleccione una opción: " choice
+
+        case "$choice" in
+            1) read -p "Nuevo usuario de la base de datos: " NEW_VALUE; sed -i "s/^DB_USER=.*/DB_USER=$NEW_VALUE/" "$CONFIG_FILE";;
+            2) read -p "Nueva contraseña de la base de datos: " NEW_VALUE; sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$NEW_VALUE/" "$CONFIG_FILE";;
+            3) read -p "Nuevo token del bot de Telegram: " NEW_VALUE; sed -i "s/^TELEGRAM_BOT_TOKEN=.*/TELEGRAM_BOT_TOKEN=$NEW_VALUE/" "$CONFIG_FILE";;
+            4) read -p "Nuevo ID del chat de Telegram: " NEW_VALUE; sed -i "s/^TELEGRAM_CHAT_ID=.*/TELEGRAM_CHAT_ID=$NEW_VALUE/" "$CONFIG_FILE";;
+            5) read -p "Nueva OpenRouter API Key: " NEW_VALUE; sed -i "s/^OPENROUTER_KEY=.*/OPENROUTER_KEY=$NEW_VALUE/" "$CONFIG_FILE";;
+            6) read -p "Nuevo Modelo de OpenRouter: " NEW_VALUE; sed -i "s/^OPENROUTER_MODEL=.*/OPENROUTER_MODEL=$NEW_VALUE/" "$CONFIG_FILE";;
+            7) cat "$CONFIG_FILE";;
+            8) break;;
+            *) echo "Opción no válida.";;
+        esac
+    done
+}
 echo "--- 7. Configurando Accesos Directos (server-start / server-mount) ---"
 
 # Configurar start_server.sh
@@ -129,6 +186,8 @@ if [[ "$START_NOW" == "S" || "$START_NOW" == "s" ]]; then
     else
         control start
     fi
+    
+    edit_config
 else
     echo "Comandos disponibles: 'control start', 'server-start', 'server-mount'"
 fi
